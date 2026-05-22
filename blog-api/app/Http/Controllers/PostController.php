@@ -15,19 +15,31 @@ class PostController extends Controller
     
     public function index(Request $request)
     {
-        $query = Post::with(['user', 'comments', 'tags'])
-            ->withCount('comments');
+        $query = Post::with([
+                'user',
+                'comments',
+                'tags',
+                'likes'
+            ])
+            ->withCount([
+                'comments',
+                'likes'
+            ]);
 
         if ($request->has('search')) {
+
             $search = $request->search;
 
             $query->where(function ($q) use ($search) {
+
                 $q->where('title', 'like', "%{$search}%")
                 ->orWhere('content', 'like', "%{$search}%");
             });
         }
 
-        $posts = $query->latest()->paginate(10);
+        $posts = $query
+            ->latest()
+            ->paginate(10);
 
         return PostResource::collection($posts);
     }

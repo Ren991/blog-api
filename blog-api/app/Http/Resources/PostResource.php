@@ -21,8 +21,11 @@ class PostResource extends JsonResource
             'comments' => CommentResource::collection(
                 $this->whenLoaded('comments')
             ),
-
+            'is_liked' => auth()->check()
+                ? $this->likes->contains('user_id', auth()->id())
+                : false,
             'created_at' => $this->created_at,
+            'likes_count' => $this->whenCounted('likes'),
         ];
     }
 }
