@@ -21,14 +21,17 @@ class PostController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'user_id' => 'required|exists:users,id'
-        ]);
+{
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'content' => 'required|string',
+    ]);
 
-        $post = Post::create($validated);
+    $post = Post::create([
+        'title' => $validated['title'],
+        'content' => $validated['content'],
+        'user_id' => auth()->id()
+    ]);
 
         return response()->json($post, 201);
     }
