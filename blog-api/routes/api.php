@@ -30,8 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('comments', CommentController::class);
 
     // Auth
+    
     Route::post('/logout', [AuthController::class, 'logout']);
-
+    Route::get('/me', [AuthController::class, 'me']);
+    
     // Likes
 
     Route::post('/posts/{post}/like', [LikeController::class, 'store']);
