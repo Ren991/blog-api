@@ -4,49 +4,57 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use App\Http\Resources\PostResource;
 
 class PostController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listar posts
      */
     public function index()
     {
-        return Post::with(['user', 'tags'])
-            ->latest()
-            ->get();
+        return PostResource::collection(
+            Post::with(['user', 'comments', 'tags'])
+                ->withCount('comments')
+                ->latest()
+                ->get()
+        );
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crear post
      */
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'content' => 'required|string',
-    ]);
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+        ]);
 
-    $post = Post::create([
-        'title' => $validated['title'],
-        'content' => $validated['content'],
-        'user_id' => auth()->id()
-    ]);
+        $post = Post::create([
+            'title' => $validated['title'],
+            'content' => $validated['content'],
+            'user_id' => auth()->id()
+        ]);
 
-        return response()->json($post, 201);
+        return new PostResource(
+            $post->load(['user', 'comments', 'tags'])
+        );
     }
 
     /**
-     * Display the specified resource.
+     * Ver post específico
      */
     public function show(string $id)
     {
-        return Post::with(['user', 'comments', 'tags'])
+        $post = Post::with(['user', 'comments', 'tags'])
             ->findOrFail($id);
+
+        return new PostResource($post);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar post
      */
     public function update(Request $request, string $id)
     {
@@ -61,11 +69,13 @@ class PostController extends Controller
 
         $post->update($validated);
 
-        return response()->json($post);
+        return new PostResource(
+            $post->load(['user', 'comments', 'tags'])
+        );
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar post (soft delete)
      */
     public function destroy(string $id)
     {

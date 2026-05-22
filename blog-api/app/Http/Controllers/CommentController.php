@@ -5,14 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Http\Request;
+use App\Http\Resources\CommentResource;
 
 class CommentController extends Controller
 {
     public function index()
     {
-        return Comment::with(['user', 'post'])
-            ->latest()
-            ->get();
+        return CommentResource::collection(
+            Comment::with(['user', 'post'])->latest()->get()
+        );
     }
 
     public function store(Request $request)
@@ -28,7 +29,9 @@ class CommentController extends Controller
             'user_id' => auth()->id()
         ]);
 
-        return response()->json($comment, 201);
+        $comment->load(['user', 'post']);
+
+        return new CommentResource($comment);
     }
 
     public function show(string $id)
