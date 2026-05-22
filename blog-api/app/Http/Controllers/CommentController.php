@@ -2,64 +2,65 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return Comment::with(['user', 'post'])
+            ->latest()
+            ->get();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'content' => 'required|string',
+            'post_id' => 'required|exists:posts,id'
+        ]);
+
+        $comment = Comment::create([
+            'content' => $validated['content'],
+            'post_id' => $validated['post_id'],
+            'user_id' => auth()->id()
+        ]);
+
+        return response()->json($comment, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Comment $comment)
+    public function show(string $id)
     {
-        //
+        return Comment::with(['user', 'post'])->findOrFail($id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Comment $comment)
+    public function update(Request $request, string $id)
     {
-        //
+        $comment = Comment::findOrFail($id);
+
+        $this->authorize('update', $comment);
+
+        $validated = $request->validate([
+            'content' => 'required|string'
+        ]);
+
+        $comment->update($validated);
+
+        return response()->json($comment);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Comment $comment)
+    public function destroy(string $id)
     {
-        //
-    }
+        $comment = Comment::findOrFail($id);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Comment $comment)
-    {
-        //
+        $this->authorize('delete', $comment);
+
+        $comment->delete();
+
+        return response()->json([
+            'message' => 'Comment deleted'
+        ]);
     }
 }
