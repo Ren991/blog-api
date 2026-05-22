@@ -52,6 +52,8 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
+        $this->authorize('update', $post);
+
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
@@ -68,6 +70,8 @@ class PostController extends Controller
     public function destroy(string $id)
     {
         $post = Post::findOrFail($id);
+
+        $this->authorize('delete', $post);
 
         $post->delete();
 
