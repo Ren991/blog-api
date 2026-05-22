@@ -11,14 +11,25 @@ class PostController extends Controller
     /**
      * Listar posts
      */
-    public function index()
+    
+    
+    public function index(Request $request)
     {
-        return PostResource::collection(
-            Post::with(['user', 'comments', 'tags'])
-                ->withCount('comments')
-                ->latest()
-                ->get()
-        );
+        $query = Post::with(['user', 'comments', 'tags'])
+            ->withCount('comments');
+
+        if ($request->has('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        $posts = $query->latest()->paginate(10);
+
+        return PostResource::collection($posts);
     }
 
     /**
