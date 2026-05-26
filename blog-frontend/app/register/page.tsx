@@ -3,23 +3,24 @@
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
 
-import { login } from "@/services/auth.service";
+import { register } from "@/services/auth.service";
 
-export default function LoginPage() {
+export default function RegisterPage() {
 
     const [showPassword, setShowPassword] = useState(false);
 
+    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const [loading, setLoading] = useState(false);
 
-    const handleLogin = async () => {
+    const handleRegister = async () => {
 
-        if (!email || !password) {
+        if (!name || !email || !password) {
             toast.error("Completá todos los campos");
             return;
         }
@@ -28,18 +29,15 @@ export default function LoginPage() {
 
             setLoading(true);
 
-            const response = await login({
+            const response = await register({
+                name,
                 email,
                 password,
             });
 
             console.log(response);
 
-            toast.success("Bienvenid@ 🚀");
-
-            // más adelante:
-            // guardar token
-            // redirect dashboard
+            toast.success("Cuenta creada 🚀");
 
         } catch (error: any) {
 
@@ -47,7 +45,7 @@ export default function LoginPage() {
 
             toast.error(
                 error?.response?.data?.message ||
-                "Credenciales inválidas"
+                "Error al registrarse"
             );
 
         } finally {
@@ -77,9 +75,9 @@ export default function LoginPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="text-7xl font-black leading-tight"
                     >
-                        Bienvenido
+                        Unite a la
                         <br />
-                        nuevamente.
+                        comunidad.
                     </motion.h1>
 
                     <motion.p
@@ -88,7 +86,7 @@ export default function LoginPage() {
                         transition={{ delay: 0.2 }}
                         className="mt-6 max-w-md text-lg text-zinc-400"
                     >
-                        Accedé a tu cuenta y continuá construyendo tus ideas.
+                        Creá tu cuenta y comenzá a compartir tus ideas.
                     </motion.p>
                 </div>
             </section>
@@ -103,14 +101,29 @@ export default function LoginPage() {
                 >
 
                     <h2 className="text-4xl font-bold">
-                        Inicie sesión
+                        Crear cuenta
                     </h2>
 
                     <p className="mt-2 text-zinc-400">
-                        Accede a tu cuenta
+                        Registrate para comenzar
                     </p>
 
                     <div className="mt-8 space-y-5">
+
+                        {/* NAME */}
+                        <div>
+                            <label className="mb-2 block text-sm text-zinc-400">
+                                Nombre
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="Tu nombre"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="w-full rounded-2xl border border-white/10 bg-black/40 px-5 py-4 outline-none transition focus:border-white/30"
+                            />
+                        </div>
 
                         {/* EMAIL */}
                         <div>
@@ -160,13 +173,13 @@ export default function LoginPage() {
 
                         {/* BUTTON */}
                         <button
-                            onClick={handleLogin}
+                            onClick={handleRegister}
                             disabled={loading}
                             className="w-full rounded-2xl bg-white py-4 font-semibold text-black transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {loading
-                                ? "Ingresando..."
-                                : "Iniciar sesión"}
+                                ? "Creando cuenta..."
+                                : "Crear cuenta"}
                         </button>
                     </div>
                 </motion.div>

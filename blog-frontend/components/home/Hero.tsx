@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -40,9 +41,9 @@ con tus ideas.        </motion.h1>
           className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
           
-          <button className="rounded-full bg-white px-8 py-4 font-semibold text-black transition hover:scale-105">
+          <Link href="/register" className="rounded-full bg-white px-8 py-4 font-semibold text-black transition hover:scale-105">
           Comenzar a escribir
-          </button>
+          </Link>
 
           <button className="rounded-full border border-white/20 px-8 py-4 font-semibold text-white transition hover:bg-white/10">
             Explorar publicaciones

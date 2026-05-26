@@ -36,9 +36,9 @@ export function Navbar() {
             Iniciar sesion
           </Link>
 
-          <button className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:scale-105">
+          <Link href="/register" className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:scale-105">
             Empezar
-          </button>
+          </Link>
         </div>
       </div>
     </motion.nav>
