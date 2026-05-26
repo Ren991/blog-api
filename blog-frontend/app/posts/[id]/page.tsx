@@ -13,6 +13,8 @@ import {
     deleteComment,
     updateComment,
 } from "@/services/comment.service";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 type Comment = {
     id: number;
@@ -121,12 +123,12 @@ export default function PostDetailPage() {
             setPost((prev) =>
                 prev
                     ? {
-                          ...prev,
-                          comments: [
-                              ...(prev.comments || []),
-                              newComment,
-                          ],
-                      }
+                        ...prev,
+                        comments: [
+                            ...(prev.comments || []),
+                            newComment,
+                        ],
+                    }
                     : prev
             );
 
@@ -165,11 +167,11 @@ export default function PostDetailPage() {
             setPost((prev) =>
                 prev
                     ? {
-                          ...prev,
-                          comments: prev.comments?.filter(
-                              (c) => c.id !== commentId
-                          ),
-                      }
+                        ...prev,
+                        comments: prev.comments?.filter(
+                            (c) => c.id !== commentId
+                        ),
+                    }
                     : prev
             );
 
@@ -199,11 +201,11 @@ export default function PostDetailPage() {
             setPost((prev) =>
                 prev
                     ? {
-                          ...prev,
-                          comments: prev.comments?.map((c) =>
-                              c.id === id ? updated : c
-                          ),
-                      }
+                        ...prev,
+                        comments: prev.comments?.map((c) =>
+                            c.id === id ? updated : c
+                        ),
+                    }
                     : prev
             );
 
@@ -245,8 +247,16 @@ export default function PostDetailPage() {
     // UI
     // =========================
     return (
+        <>
+        <Link
+                href="/"
+                className="absolute left-6 top-6 z-50 flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300 backdrop-blur-xl transition hover:bg-white/10 hover:text-white"
+            >
+                <ArrowLeft size={16} />
+                Volver
+            </Link>
         <div className="max-w-2xl mx-auto px-6 py-10 text-white">
-
+           
             {/* POST */}
             <div className="border border-white/10 rounded-2xl p-6 bg-white/5">
                 <h1 className="text-3xl font-bold">{post.title}</h1>
@@ -356,5 +366,6 @@ export default function PostDetailPage() {
                 </div>
             </div>
         </div>
+        </>
     );
 }
