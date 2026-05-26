@@ -1,46 +1,67 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { useAuth } from "@/app/context/AuthContext";
+import { LogOut, User } from "lucide-react";
 
-export function Navbar() {
+export default function Navbar() {
+  const { user, logout, isAuthenticated } = useAuth();
+
   return (
-    <motion.nav
-      initial={{ y: -40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 right-0 z-50 border-b border-white/10 bg-black/40 backdrop-blur-xl"
-    >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        
-        <Link
-          href="/"
-          className="text-2xl font-black tracking-tight text-white"
-        >
-          EpicBlog
-        </Link>
+    <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/60 backdrop-blur-xl">
+      
+      {/* BRAND */}
+      <Link href="/" className="text-xl font-bold">
+        EpicBlog
+      </Link>
 
-        <div className="flex items-center gap-6">
-          
-          <Link
-            href="/"
-            className="text-sm text-zinc-300 transition hover:text-white"
-          >
-            Inicio
-          </Link>
+      {/* RIGHT SIDE */}
+      <div className="flex items-center gap-4">
 
-          <Link
-            href="/login"
-            className="text-sm text-zinc-300 transition hover:text-white"
-          >
-            Iniciar sesion
-          </Link>
+        {isAuthenticated ? (
+          <>
+            {/* PROFILE */}
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 hover:bg-white/10 transition"
+            >
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-sm font-bold">
+                {user?.name?.charAt(0).toUpperCase()}
+              </div>
 
-          <Link href="/register" className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:scale-105">
-            Empezar
-          </Link>
-        </div>
+              <span className="text-sm text-white">
+                {user?.name}
+              </span>
+            </Link>
+
+            {/* LOGOUT */}
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 rounded-full bg-red-500/10 text-red-400 px-3 py-1 hover:bg-red-500/20 transition"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/login"
+              className="text-sm text-zinc-300 hover:text-white"
+            >
+              Iniciar sesión
+            </Link>
+
+            <Link
+              href="/register"
+              className="rounded-full bg-white text-black px-4 py-2 text-sm font-medium hover:scale-105 transition"
+            >
+              Empezar
+            </Link>
+          </>
+        )}
+
       </div>
-    </motion.nav>
+    </nav>
   );
 }

@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
+import { AuthProvider } from "./context/AuthContext";
 
 export const metadata: Metadata = {
   title: "EpicBlog",
@@ -15,12 +16,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-black text-white antialiased">
-        {children}
+        <AuthProvider>
+          {children}
 
-        <Toaster
-          richColors
-          position="top-right"
-        />
+          <Toaster
+            richColors
+            position="top-right"
+          />
+        </AuthProvider>
       </body>
     </html>
   );

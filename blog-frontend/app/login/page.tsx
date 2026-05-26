@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useAuth } from "@/app/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 import { login } from "@/services/auth.service";
 
@@ -16,6 +18,8 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
 
     const [loading, setLoading] = useState(false);
+    const { login: setAuth } = useAuth();
+    const router = useRouter();
 
     const handleLogin = async () => {
 
@@ -33,9 +37,11 @@ export default function LoginPage() {
                 password,
             });
 
-            console.log(response);
+             setAuth(response.token, response.user);
 
             toast.success("Bienvenid@ 🚀");
+
+            router.push("/");
 
             // más adelante:
             // guardar token
