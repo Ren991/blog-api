@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { api } from "@/services/api";
 import { useAuth } from "@/app/context/AuthContext";
 import { likePost, unlikePost } from "@/services/like.service";
+import { createComment } from "@/services/comment.service";
 
 type Comment = {
     id: number;
@@ -23,6 +24,7 @@ type Post = {
     };
     likes_count?: number;
     comments?: Comment[];
+    is_liked?: boolean;
 };
 
 export default function PostDetailPage() {
@@ -31,21 +33,27 @@ export default function PostDetailPage() {
 
     const [post, setPost] = useState<Post | null>(null);
     const [loading, setLoading] = useState(true);
+
     const [comment, setComment] = useState("");
     const [isLiked, setIsLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(0);
     const [loadingLike, setLoadingLike] = useState(false);
+    const [loadingComment, setLoadingComment] = useState(false);
 
-
+    // =========================
+    // FETCH POST
+    // =========================
     useEffect(() => {
         const fetchPost = async () => {
             try {
                 setLoading(true);
 
                 const res = await api.get(`/posts/${id}`);
-                setPost(res.data.data);
-                setIsLiked(res.data.data.is_liked);
-                setLikesCount(res.data.data.likes_count);
+                const data = res.data.data;
+
+                setPost(data);
+                setIsLiked(data.is_liked);
+                setLikesCount(data.likes_count || 0);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -56,13 +64,16 @@ export default function PostDetailPage() {
         fetchPost();
     }, [id]);
 
+    // =========================
+    // LIKE / UNLIKE
+    // =========================
     const handleToggleLike = async () => {
         if (!post || loadingLike) return;
 
         try {
             setLoadingLike(true);
 
-            // OPTIMISTIC UI (instantáneo)
+            // optimistic UI
             setIsLiked((prev) => !prev);
             setLikesCount((prev) => prev + (isLiked ? -1 : 1));
 
@@ -71,41 +82,39 @@ export default function PostDetailPage() {
             } else {
                 await likePost(post.id);
             }
-
         } catch (err) {
             console.error(err);
 
-            // rollback si falla
+            // rollback
             setIsLiked((prev) => !prev);
             setLikesCount((prev) => prev + (isLiked ? 1 : -1));
-
         } finally {
             setLoadingLike(false);
         }
     };
 
+    // =========================
+    // CREATE COMMENT
+    // =========================
     const handleComment = async () => {
-        if (!comment) return;
+        if (!comment.trim() || !post || loadingComment) return;
 
         try {
-            const res = await api.post(
-                "/comments",
-                {
-                    content: comment,
-                    post_id: id,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            setLoadingComment(true);
+
+            const newComment = await createComment({
+                postId: post.id,
+                content: comment,
+            });
 
             setPost((prev) =>
                 prev
                     ? {
                         ...prev,
-                        comments: [...(prev.comments || []), res.data],
+                        comments: [
+                            ...(prev.comments || []),
+                            newComment,
+                        ],
                     }
                     : prev
             );
@@ -113,9 +122,14 @@ export default function PostDetailPage() {
             setComment("");
         } catch (err) {
             console.error(err);
+        } finally {
+            setLoadingComment(false);
         }
     };
 
+    // =========================
+    // LOADING
+    // =========================
     if (loading) {
         return (
             <div className="max-w-2xl mx-auto p-8 space-y-4">
@@ -125,6 +139,9 @@ export default function PostDetailPage() {
         );
     }
 
+    // =========================
+    // NOT FOUND
+    // =========================
     if (!post) {
         return (
             <div className="text-center text-zinc-400 mt-20">
@@ -133,8 +150,12 @@ export default function PostDetailPage() {
         );
     }
 
+    // =========================
+    // UI
+    // =========================
     return (
         <div className="max-w-2xl mx-auto px-6 py-10 text-white">
+
             {/* POST */}
             <div className="border border-white/10 rounded-2xl p-6 bg-white/5">
                 <h1 className="text-3xl font-bold">{post.title}</h1>
@@ -147,7 +168,6 @@ export default function PostDetailPage() {
                     {post.content}
                 </p>
 
-             
                 <button
                     onClick={handleToggleLike}
                     disabled={loadingLike}
@@ -176,9 +196,10 @@ export default function PostDetailPage() {
 
                     <button
                         onClick={handleComment}
-                        className="px-4 py-2 rounded-xl bg-white text-black font-semibold"
+                        disabled={loadingComment}
+                        className="px-4 py-2 rounded-xl bg-white text-black font-semibold disabled:opacity-50"
                     >
-                        Enviar
+                        {loadingComment ? "..." : "Enviar"}
                     </button>
                 </div>
 
@@ -194,7 +215,9 @@ export default function PostDetailPage() {
                                     {c.user?.name}
                                 </p>
 
-                                <p className="text-white">{c.content}</p>
+                                <p className="text-white">
+                                    {c.content}
+                                </p>
                             </div>
                         ))
                     ) : (
