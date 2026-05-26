@@ -2,15 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Swal from "sweetalert2";
+
 import { api } from "@/services/api";
 import { useAuth } from "@/app/context/AuthContext";
+
 import { likePost, unlikePost } from "@/services/like.service";
-import { createComment } from "@/services/comment.service";
+import {
+    createComment,
+    deleteComment,
+    updateComment,
+} from "@/services/comment.service";
 
 type Comment = {
     id: number;
     content: string;
-    user: {
+    user?: {
+        id: number;
         name: string;
     };
 };
@@ -29,16 +37,21 @@ type Post = {
 
 export default function PostDetailPage() {
     const { id } = useParams();
-    const { token } = useAuth();
+    const { user } = useAuth();
 
     const [post, setPost] = useState<Post | null>(null);
     const [loading, setLoading] = useState(true);
 
     const [comment, setComment] = useState("");
+
     const [isLiked, setIsLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(0);
     const [loadingLike, setLoadingLike] = useState(false);
+
     const [loadingComment, setLoadingComment] = useState(false);
+
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editText, setEditText] = useState("");
 
     // =========================
     // FETCH POST
@@ -65,7 +78,7 @@ export default function PostDetailPage() {
     }, [id]);
 
     // =========================
-    // LIKE / UNLIKE
+    // LIKE
     // =========================
     const handleToggleLike = async () => {
         if (!post || loadingLike) return;
@@ -73,7 +86,6 @@ export default function PostDetailPage() {
         try {
             setLoadingLike(true);
 
-            // optimistic UI
             setIsLiked((prev) => !prev);
             setLikesCount((prev) => prev + (isLiked ? -1 : 1));
 
@@ -85,7 +97,6 @@ export default function PostDetailPage() {
         } catch (err) {
             console.error(err);
 
-            // rollback
             setIsLiked((prev) => !prev);
             setLikesCount((prev) => prev + (isLiked ? 1 : -1));
         } finally {
@@ -110,20 +121,103 @@ export default function PostDetailPage() {
             setPost((prev) =>
                 prev
                     ? {
-                        ...prev,
-                        comments: [
-                            ...(prev.comments || []),
-                            newComment,
-                        ],
-                    }
+                          ...prev,
+                          comments: [
+                              ...(prev.comments || []),
+                              newComment,
+                          ],
+                      }
                     : prev
             );
 
             setComment("");
+
+            Swal.fire({
+                icon: "success",
+                title: "Comentario creado",
+                timer: 1200,
+                showConfirmButton: false,
+            });
         } catch (err) {
             console.error(err);
         } finally {
             setLoadingComment(false);
+        }
+    };
+
+    // =========================
+    // DELETE COMMENT (CONFIRMADO)
+    // =========================
+    const handleDelete = async (commentId: number) => {
+        const confirm = await Swal.fire({
+            title: "¿Desea eliminar el comentario?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "No",
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        try {
+            await deleteComment(commentId);
+
+            setPost((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          comments: prev.comments?.filter(
+                              (c) => c.id !== commentId
+                          ),
+                      }
+                    : prev
+            );
+
+            Swal.fire({
+                icon: "success",
+                title: "Comentario eliminado",
+                timer: 1200,
+                showConfirmButton: false,
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    // =========================
+    // EDIT COMMENT
+    // =========================
+    const handleEdit = (c: Comment) => {
+        setEditingId(c.id);
+        setEditText(c.content);
+    };
+
+    const handleUpdate = async (id: number) => {
+        try {
+            const updated = await updateComment(id, editText);
+
+            setPost((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          comments: prev.comments?.map((c) =>
+                              c.id === id ? updated : c
+                          ),
+                      }
+                    : prev
+            );
+
+            setEditingId(null);
+            setEditText("");
+
+            Swal.fire({
+                icon: "success",
+                title: "Comentario editado",
+                timer: 1200,
+                showConfirmButton: false,
+            });
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -139,9 +233,6 @@ export default function PostDetailPage() {
         );
     }
 
-    // =========================
-    // NOT FOUND
-    // =========================
     if (!post) {
         return (
             <div className="text-center text-zinc-400 mt-20">
@@ -164,15 +255,15 @@ export default function PostDetailPage() {
                     by {post.user?.name}
                 </p>
 
-                <p className="mt-6 text-zinc-200 leading-relaxed">
+                <p className="mt-6 text-zinc-200">
                     {post.content}
                 </p>
 
                 <button
                     onClick={handleToggleLike}
                     disabled={loadingLike}
-                    className={`mt-4 flex items-center gap-2 rounded-xl px-4 py-2 transition
-                        ${isLiked ? "bg-red-500 text-white" : "bg-white/10 text-white"}
+                    className={`mt-4 px-4 py-2 rounded-xl transition
+                        ${isLiked ? "bg-red-500" : "bg-white/10"}
                     `}
                 >
                     ❤️ {likesCount}
@@ -191,40 +282,77 @@ export default function PostDetailPage() {
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                         placeholder="Escribí un comentario..."
-                        className="flex-1 rounded-xl bg-white/5 border border-white/10 px-4 py-2 outline-none"
+                        className="flex-1 bg-white/5 border border-white/10 px-4 py-2 rounded-xl"
                     />
 
                     <button
                         onClick={handleComment}
                         disabled={loadingComment}
-                        className="px-4 py-2 rounded-xl bg-white text-black font-semibold disabled:opacity-50"
+                        className="px-4 py-2 bg-white text-black rounded-xl"
                     >
-                        {loadingComment ? "..." : "Enviar"}
+                        Enviar
                     </button>
                 </div>
 
                 {/* list */}
                 <div className="space-y-3">
-                    {post.comments?.length ? (
-                        post.comments.map((c) => (
-                            <div
-                                key={c.id}
-                                className="p-3 rounded-xl bg-white/5 border border-white/10"
-                            >
-                                <p className="text-sm text-zinc-400">
-                                    {c.user?.name}
-                                </p>
+                    {post.comments?.map((c) => (
+                        <div
+                            key={c.id}
+                            className="p-3 rounded-xl bg-white/5 border border-white/10"
+                        >
+                            <p className="text-sm text-zinc-400">
+                                {c.user?.name ?? "Usuario"}
+                            </p>
 
-                                <p className="text-white">
+                            {editingId === c.id ? (
+                                <div className="flex gap-2 mt-2">
+                                    <input
+                                        value={editText}
+                                        onChange={(e) =>
+                                            setEditText(e.target.value)
+                                        }
+                                        className="flex-1 bg-white/10 px-2 py-1 rounded"
+                                    />
+
+                                    <button
+                                        onClick={() =>
+                                            handleUpdate(c.id)
+                                        }
+                                        className="text-green-400"
+                                    >
+                                        Guardar
+                                    </button>
+                                </div>
+                            ) : (
+                                <p className="text-white mt-1">
                                     {c.content}
                                 </p>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-zinc-500 text-sm">
-                            Sin comentarios aún
-                        </p>
-                    )}
+                            )}
+
+                            {/* actions */}
+                            {user?.id === c.user?.id &&
+                                editingId !== c.id && (
+                                    <div className="flex gap-3 mt-2 text-sm">
+                                        <button
+                                            onClick={() => handleEdit(c)}
+                                            className="text-blue-400"
+                                        >
+                                            Editar
+                                        </button>
+
+                                        <button
+                                            onClick={() =>
+                                                handleDelete(c.id)
+                                            }
+                                            className="text-red-400"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
+                                )}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
