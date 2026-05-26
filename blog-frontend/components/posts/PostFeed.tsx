@@ -13,6 +13,7 @@ type Post = {
     name: string;
   };
   likes_count?: number;
+  is_liked: boolean;
   comments_count?: number;
 };
 
