@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "EpicBlog",
+  title: "El Bloque de Código",
   description: "Modern blog platform",
 };
 

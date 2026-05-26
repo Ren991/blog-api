@@ -12,7 +12,7 @@ export default function Navbar() {
       
       {/* BRAND */}
       <Link href="/" className="text-xl font-bold">
-        EpicBlog
+      Merge Conflict
       </Link>
 
       {/* RIGHT SIDE */}
