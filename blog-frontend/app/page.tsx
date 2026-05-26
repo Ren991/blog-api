@@ -1,13 +1,11 @@
-import Image from "next/image";
+import { Hero } from "@/components/home/Hero";
+import { Navbar } from "@/components/layout/Navbar";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-       <main className="min-h-screen flex items-center justify-center">
-      <h1 className="text-5xl font-bold">
-        Blog 🚀
-      </h1>
+    <main className="bg-black">
+      <Navbar />
+      <Hero />
     </main>
-    </div>
   );
 }
