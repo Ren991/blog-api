@@ -45,9 +45,9 @@ con tus ideas.        </motion.h1>
           Comenzar a escribir
           </Link>
 
-          <button className="rounded-full border border-white/20 px-8 py-4 font-semibold text-white transition hover:bg-white/10">
+          <Link href="/login" className="rounded-full border border-white/20 px-8 py-4 font-semibold text-white transition hover:bg-white/10">
             Explorar publicaciones
-          </button>
+          </Link>
         </motion.div>
       </div>
     </section>
