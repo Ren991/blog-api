@@ -63,3 +63,10 @@ export const deletePost = async (
 
   return res.data;
 };
+
+export const getLikedPosts = async () => {
+
+    const res = await api.get("/liked-posts");
+
+    return res.data.data;
+};

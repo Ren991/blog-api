@@ -2,78 +2,328 @@
 
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { LogOut, User } from "lucide-react";
-import { useEffect } from "react";
+
+import {
+    LogOut,
+    Heart,
+    ArrowLeft,
+} from "lucide-react";
+
+import { useEffect, useState } from "react";
+
+import Link from "next/link";
+
+import { getLikedPosts } from "@/services/post.service";
+
+import PostCard from "@/components/posts/PostCard";
+
+type Tag = {
+    id: number;
+    name: string;
+};
+
+type Post = {
+    id: number;
+
+    title: string;
+
+    content: string;
+
+    created_at: string;
+
+    user: {
+        name: string;
+    };
+
+    likes_count?: number;
+
+    comments_count?: number;
+
+    is_liked: boolean;
+
+    tags?: Tag[];
+};
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, logout } = useAuth();
-  const router = useRouter();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push("/login");
-    }
-  }, [isAuthenticated, router]);
+    const {
+        user,
+        isAuthenticated,
+        logout,
+    } = useAuth();
 
-  if (!user) return null;
+    const router = useRouter();
 
-  return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+    const [likedPosts, setLikedPosts] =
+        useState<Post[]>([]);
 
-        {/* AVATAR */}
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-2xl font-bold">
-            {user.name.charAt(0).toUpperCase()}
-          </div>
+    const [loadingLikes, setLoadingLikes] =
+        useState(true);
 
-          <h1 className="text-2xl font-bold">
-            {user.name}
-          </h1>
+    // =========================
+    // REDIRECT
+    // =========================
+    useEffect(() => {
 
-          <p className="text-zinc-400">
-            {user.email}
-          </p>
-        </div>
+        if (!isAuthenticated) {
 
-        {/* INFO BOX */}
-        <div className="mt-8 space-y-3 text-sm text-zinc-300">
-          <div className="flex justify-between border-b border-white/10 py-2">
-            <span>Usuario</span>
-            <span>{user.name}</span>
-          </div>
+            router.push("/login");
+        }
 
-          <div className="flex justify-between border-b border-white/10 py-2">
-            <span>Email</span>
-            <span>{user.email}</span>
-          </div>
+    }, [isAuthenticated, router]);
 
-          <div className="flex justify-between py-2">
-            <span>Status</span>
-            <span className="text-green-400">Activo</span>
-          </div>
-        </div>
+    // =========================
+    // FETCH LIKED POSTS
+    // ========================= 
+    useEffect(() => {
 
-        {/* ACTIONS */}
-        <div className="mt-8 flex flex-col gap-3">
+        const fetchLikedPosts = async () => {
 
-          <button
-            onClick={logout}
-            className="flex items-center justify-center gap-2 rounded-xl bg-red-500/10 text-red-400 py-3 hover:bg-red-500/20 transition"
-          >
-            <LogOut size={18} />
-            Cerrar sesión
-          </button>
+            try {
 
-          <button
-            onClick={() => router.push("/")}
-            className="rounded-xl border border-white/10 py-3 hover:bg-white/5 transition"
-          >
-            Volver al inicio
-          </button>
+                setLoadingLikes(true);
 
-        </div>
-      </div>
-    </main>
-  );
+                const data =
+                    await getLikedPosts();
+
+                setLikedPosts(data);
+
+            } catch (err) {
+
+                console.error(err);
+
+            } finally {
+
+                setLoadingLikes(false);
+            }
+        };
+
+        if (isAuthenticated) {
+
+            fetchLikedPosts();
+        }
+
+    }, [isAuthenticated]);
+
+    if (!user) return null;
+
+    // =========================
+    // UI
+    // =========================
+    return (
+        <main className="min-h-screen bg-black text-white px-6 py-10">
+
+            {/* BACK */}
+            <Link
+                href="/"
+                className="
+                    inline-flex
+                    items-center
+                    gap-2
+                    mb-8
+                    text-zinc-400
+                    hover:text-white
+                    transition
+                "
+            >
+                <ArrowLeft size={18} />
+                Volver
+            </Link>
+
+            <div className="max-w-4xl mx-auto">
+
+                {/* PROFILE CARD */}
+                <div
+                    className="
+                        rounded-3xl
+                        border border-white/10
+                        bg-white/5
+                        p-8
+                        backdrop-blur-xl
+                    "
+                >
+
+                    {/* HEADER */}
+                    <div className="flex items-center gap-5">
+
+                        {/* AVATAR */}
+                        <div
+                            className="
+                                h-24
+                                w-24
+                                rounded-full
+                                bg-gradient-to-br
+                                from-purple-500
+                                to-blue-500
+                                flex
+                                items-center
+                                justify-center
+                                text-3xl
+                                font-bold
+                            "
+                        >
+                            {user.name
+                                .charAt(0)
+                                .toUpperCase()}
+                        </div>
+
+                        {/* INFO */}
+                        <div>
+
+                            <h1 className="text-3xl font-bold">
+                                {user.name}
+                            </h1>
+
+                            <p className="text-zinc-400 mt-1">
+                                {user.email}
+                            </p>
+
+                            <div className="flex gap-6 mt-4 text-sm">
+
+                                <div>
+                                    <span className="text-zinc-500">
+                                        Likes dados
+                                    </span>
+
+                                    <p className="font-semibold text-white">
+                                        {likedPosts.length}
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <span className="text-zinc-500">
+                                        Estado
+                                    </span>
+
+                                    <p className="text-green-400 font-semibold">
+                                        Activo
+                                    </p>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {/* ACTIONS */}
+                    <div className="mt-8 flex flex-wrap gap-3">
+
+                        <button
+                            onClick={logout}
+                            className="
+                                flex items-center
+                                gap-2
+                                rounded-xl
+                                bg-red-500/10
+                                text-red-400
+                                px-5 py-3
+                                hover:bg-red-500/20
+                                transition
+                            "
+                        >
+
+                            <LogOut size={18} />
+
+                            Cerrar sesión
+
+                        </button>
+
+                        <button
+                            onClick={() =>
+                                router.push("/")
+                            }
+                            className="
+                                rounded-xl
+                                border border-white/10
+                                px-5 py-3
+                                hover:bg-white/5
+                                transition
+                            "
+                        >
+                            Inicio
+                        </button>
+
+                    </div>
+
+                </div>
+
+                {/* LIKED POSTS */}
+                <div className="mt-12">
+
+                    <div className="flex items-center gap-3 mb-6">
+
+                        <Heart
+                            className="text-red-500"
+                            size={22}
+                        />
+
+                        <h2 className="text-2xl font-bold">
+                            Posts que te gustaron
+                        </h2>
+
+                    </div>
+
+                    {/* LOADING */}
+                    {loadingLikes ? (
+
+                        <div className="space-y-4">
+
+                            {Array.from({
+                                length: 3,
+                            }).map((_, i) => (
+
+                                <div
+                                    key={i}
+                                    className="
+                                        h-32
+                                        rounded-2xl
+                                        bg-white/5
+                                        border border-white/10
+                                        animate-pulse
+                                    "
+                                />
+
+                            ))}
+
+                        </div>
+
+                    ) : likedPosts.length > 0 ? (
+
+                        <div className="space-y-4">
+
+                            {likedPosts.map((post) => (
+
+                                <PostCard
+                                    key={post.id}
+                                    post={post}
+                                />
+
+                            ))}
+
+                        </div>
+
+                    ) : (
+
+                        <div
+                            className="
+                                rounded-2xl
+                                border border-white/10
+                                bg-white/5
+                                p-8
+                                text-center
+                                text-zinc-500
+                            "
+                        >
+                            No tenés posts likeados aún
+                        </div>
+
+                    )}
+
+                </div>
+
+            </div>
+
+        </main>
+    );
 }

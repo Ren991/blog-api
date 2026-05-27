@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\Like;
+use App\Http\Resources\PostResource;
 
 class LikeController extends Controller
 {
@@ -49,4 +50,24 @@ class LikeController extends Controller
             'message' => 'Like removed'
         ]);
     }
+
+    public function likedPosts()
+{
+    $posts = auth()->user()
+        ->likedPosts()
+        ->with([
+            'user',
+            'tags',
+            'comments',
+            'likes'
+        ])
+        ->withCount([
+            'likes',
+            'comments'
+        ])
+        ->latest()
+        ->get();
+
+    return PostResource::collection($posts);
+}
 }
