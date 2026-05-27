@@ -22,6 +22,9 @@ type Post = {
 
     content: string;
 
+    created_at: string;
+
+
     user: {
         name: string;
     };

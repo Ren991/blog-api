@@ -23,6 +23,9 @@ type Post = {
 
     content: string;
 
+    created_at: string;
+
+
     user: {
         name: string;
     };
@@ -48,7 +51,7 @@ export default function PostCard({
     post,
     onTagClick,
 }: Props) {
-
+  console.log(post)
     const [liked, setLiked] =
         useState(post.is_liked);
 
@@ -229,6 +232,14 @@ export default function PostCard({
                     💬 {post.comments_count || 0}
 
                 </div>
+
+
+                 {/* DATE */}
+    <div className="ml-auto text-xs text-zinc-500">
+
+        {new Date(post.created_at).toLocaleDateString()}
+
+    </div>
 
             </div>
 
