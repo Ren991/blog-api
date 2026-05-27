@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { getPosts } from "@/services/post.service";
 import PostCard from "./PostCard";
+import Link from "next/link";
 
 type Post = {
   id: number;
@@ -85,6 +86,12 @@ export default function PostFeed() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
       {/* HEADER FEED */}
+      <Link
+    href="/posts/create"
+    className="px-4 py-2 rounded-xl bg-white text-black"
+>
+    + Crear post
+</Link>
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Feed</h1>
         <p className="text-sm text-zinc-400">
