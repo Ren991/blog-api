@@ -40,7 +40,7 @@ export default function Navbar() {
               className="flex items-center gap-2 rounded-full bg-red-500/10 text-red-400 px-3 py-1 hover:bg-red-500/20 transition"
             >
               <LogOut size={16} />
-              Logout
+              Cerrar sesión
             </button>
           </>
         ) : (
