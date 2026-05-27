@@ -1,6 +1,6 @@
 import { api } from "./api";
 
-export const getPosts = async (token: string) => {
+/* export const getPosts = async (token: string) => {
   const res = await api.get("/posts", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -8,6 +8,19 @@ export const getPosts = async (token: string) => {
   });
 
   return res.data.data;
+}; */
+export const getPosts = async (
+    token: string,
+    search?: string
+) => {
+
+    const res = await api.get("/posts", {
+        params: {
+            search,
+        },
+    });
+
+    return res.data.data;
 };
 
 export const createPost = async ({

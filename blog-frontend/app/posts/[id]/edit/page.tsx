@@ -152,6 +152,16 @@ export default function EditPostPage() {
             return;
         }
 
+        if (tags.length === 0) {
+
+            Swal.fire({
+                icon: "warning",
+                title: "Debes agregar al menos un tag",
+            });
+
+            return;
+        }
+
         if (!content.trim()) {
 
             Swal.fire({

@@ -34,15 +34,67 @@ class PostController extends Controller
          * SEARCH
          * =========================
          */
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
 
-            $search = $request->search;
+    $search = $request->search;
 
-            $query->where(function ($q) use ($search) {
+    $words = explode(' ', $search);
 
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('content', 'like', "%{$search}%");
-            });
+    $tags = [];
+    $text = [];
+
+    foreach ($words as $word) {
+
+        if (str_starts_with($word, '#')) {
+
+            $tags[] = strtolower(
+                str_replace('#', '', $word)
+            );
+
+        } else {
+
+            $text[] = $word;
+        }
+    }
+
+    // =========================
+    // TEXT SEARCH
+    // =========================
+    if (!empty($text)) {
+
+        $textSearch = implode(' ', $text);
+
+        $query->where(function ($q) use ($textSearch) {
+
+            $q->where(
+                'title',
+                'like',
+                "%{$textSearch}%"
+            )
+            ->orWhere(
+                'content',
+                'like',
+                "%{$textSearch}%"
+            );
+        });
+    }
+
+    // =========================
+    // TAG SEARCH
+    // =========================
+    if (!empty($tags)) {
+
+                $query->whereHas(
+                    'tags',
+                    function ($q) use ($tags) {
+
+                        $q->whereIn(
+                            'name',
+                            $tags
+                        );
+                    }
+                );
+            }
         }
 
         /**
