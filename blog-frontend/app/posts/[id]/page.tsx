@@ -56,7 +56,7 @@ type Post = {
     id: number;
     title: string;
     content: string;
-
+    created_at: string;
     user: {
         id: number;
         name: string;
@@ -506,7 +506,7 @@ export default function PostDetailPage() {
                         <div className="flex gap-3 mt-4">
 
                             {/* EDIT */}
-                            
+
                             <Link
                                 href={`/posts/${post.id}/edit`}
                                 className="
@@ -528,6 +528,12 @@ export default function PostDetailPage() {
                             >
                                 <Trash2 size={18} />
                             </button>
+                            {/* DATE */}
+                            <div className="ml-auto text-xs text-zinc-500">
+
+                                {new Date(post.created_at).toLocaleDateString()}
+
+                            </div>
 
                         </div>
                     )}
@@ -678,6 +684,7 @@ export default function PostDetailPage() {
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>
+
 
                                             </div>
                                         )}
