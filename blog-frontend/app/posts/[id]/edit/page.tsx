@@ -22,6 +22,8 @@ import {
     updatePost,
 } from "@/services/post.service";
 
+import SlideToPost from "@/components/ui/SlideToPost";
+
 type Tag = {
     id: number;
     name: string;
@@ -29,30 +31,23 @@ type Tag = {
 
 type Post = {
     id: number;
-
     title: string;
-
     content: string;
-
     tags?: Tag[];
 };
 
 export default function EditPostPage() {
 
     const { id } = useParams();
-
     const router = useRouter();
 
     const [loading, setLoading] = useState(true);
-
     const [saving, setSaving] = useState(false);
 
     const [title, setTitle] = useState("");
-
     const [content, setContent] = useState("");
 
     const [tagInput, setTagInput] = useState("");
-
     const [tags, setTags] = useState<string[]>([]);
 
     // =========================
@@ -71,7 +66,6 @@ export default function EditPostPage() {
                 const data: Post = res.data.data;
 
                 setTitle(data.title);
-
                 setContent(data.content);
 
                 setTags(
@@ -88,7 +82,6 @@ export default function EditPostPage() {
                 });
 
             } finally {
-
                 setLoading(false);
             }
         };
@@ -104,25 +97,14 @@ export default function EditPostPage() {
         e: React.KeyboardEvent<HTMLInputElement>
     ) => {
 
-        if (
-            e.key === "," ||
-            e.key === "Enter"
-        ) {
+        if (e.key === "," || e.key === "Enter") {
 
             e.preventDefault();
 
-            const value =
-                tagInput.trim().toLowerCase();
+            const value = tagInput.trim().toLowerCase();
 
-            if (
-                value &&
-                !tags.includes(value)
-            ) {
-
-                setTags((prev) => [
-                    ...prev,
-                    value,
-                ]);
+            if (value && !tags.includes(value)) {
+                setTags((prev) => [...prev, value]);
             }
 
             setTagInput("");
@@ -130,7 +112,6 @@ export default function EditPostPage() {
     };
 
     const removeTag = (tag: string) => {
-
         setTags((prev) =>
             prev.filter((t) => t !== tag)
         );
@@ -139,51 +120,41 @@ export default function EditPostPage() {
     // =========================
     // UPDATE POST
     // =========================
-    const handleSubmit = async () => {
+    const handleSubmit = async (): Promise<boolean> => {
 
-        // VALIDATIONS
         if (!title.trim()) {
-
             Swal.fire({
                 icon: "warning",
                 title: "El título es obligatorio",
             });
-
-            return;
+            return false;
         }
 
         if (tags.length === 0) {
-
             Swal.fire({
                 icon: "warning",
                 title: "Debes agregar al menos un tag",
             });
-
-            return;
+            return false;
         }
 
         if (!content.trim()) {
-
             Swal.fire({
                 icon: "warning",
                 title: "El contenido es obligatorio",
             });
-
-            return;
+            return false;
         }
 
         try {
 
             setSaving(true);
 
-            await updatePost(
-                Number(id),
-                {
-                    title,
-                    content,
-                    tags,
-                }
-            );
+            await updatePost(Number(id), {
+                title,
+                content,
+                tags,
+            });
 
             await Swal.fire({
                 icon: "success",
@@ -194,6 +165,8 @@ export default function EditPostPage() {
 
             router.push(`/posts/${id}`);
 
+            return true;
+
         } catch (err) {
 
             console.error(err);
@@ -203,8 +176,9 @@ export default function EditPostPage() {
                 title: "Error actualizando post",
             });
 
-        } finally {
+            return false;
 
+        } finally {
             setSaving(false);
         }
     };
@@ -213,34 +187,21 @@ export default function EditPostPage() {
     // LOADING
     // =========================
     if (loading) {
-
         return (
             <div className="max-w-2xl mx-auto p-8 space-y-4">
-
                 <div className="h-10 bg-white/10 rounded animate-pulse" />
-
                 <div className="h-40 bg-white/10 rounded animate-pulse" />
-
             </div>
         );
     }
 
-    // =========================
-    // UI
-    // =========================
     return (
         <div className="max-w-2xl mx-auto px-6 py-10 text-white">
 
             {/* BACK */}
             <Link
                 href={`/posts/${id}`}
-                className="
-                    inline-flex items-center gap-2
-                    text-zinc-400
-                    hover:text-white
-                    transition
-                    mb-6
-                "
+                className="inline-flex items-center gap-2 text-zinc-400 hover:text-white mb-6"
             >
                 <ArrowLeft size={18} />
                 Volver
@@ -249,157 +210,59 @@ export default function EditPostPage() {
             {/* CARD */}
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
 
-                {/* TITLE */}
                 <h1 className="text-3xl font-bold mb-6">
                     Editar post
                 </h1>
 
-                {/* TITLE INPUT */}
-                <div className="mb-5">
-
-                    <label className="text-sm text-zinc-400 block mb-2">
-                        Título
-                    </label>
-
-                    <input
-                        value={title}
-                        onChange={(e) =>
-                            setTitle(e.target.value)
-                        }
-                        placeholder="Título del post"
-                        className="
-                            w-full
-                            rounded-xl
-                            border border-white/10
-                            bg-white/5
-                            px-4 py-3
-                            outline-none
-                            focus:border-white/20
-                        "
-                    />
-
-                </div>
+                {/* TITLE */}
+                <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full mb-4 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+                />
 
                 {/* CONTENT */}
-                <div className="mb-5">
+                <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={8}
+                    className="w-full mb-4 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+                />
 
-                    <label className="text-sm text-zinc-400 block mb-2">
-                        Contenido
-                    </label>
+                {/* TAG INPUT */}
+                <input
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="tags..."
+                    className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+                />
 
-                    <textarea
-                        value={content}
-                        onChange={(e) =>
-                            setContent(
-                                e.target.value
-                            )
-                        }
-                        placeholder="Contenido..."
-                        rows={8}
-                        className="
-                            w-full
-                            rounded-xl
-                            border border-white/10
-                            bg-white/5
-                            px-4 py-3
-                            outline-none
-                            resize-none
-                            focus:border-white/20
-                        "
-                    />
+                {/* CHIPS */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                    {tags.map((tag) => (
+                        <div
+                            key={tag}
+                            className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/10"
+                        >
+                            #{tag}
 
+                            <button onClick={() => removeTag(tag)}>
+                                <X size={14} />
+                            </button>
+                        </div>
+                    ))}
                 </div>
 
-                {/* TAGS */}
-                <div className="mb-6">
-
-                    <label className="text-sm text-zinc-400 block mb-2">
-                        Tags
-                    </label>
-
-                    <input
-                        value={tagInput}
-                        onChange={(e) =>
-                            setTagInput(
-                                e.target.value
-                            )
-                        }
-                        onKeyDown={handleKeyDown}
-                        placeholder="react, frontend, laravel..."
-                        className="
-                            w-full
-                            rounded-xl
-                            border border-white/10
-                            bg-white/5
-                            px-4 py-3
-                            outline-none
-                            focus:border-white/20
-                        "
+                {/* SLIDE TO SAVE */}
+                <div className="mt-8">
+                    <SlideToPost
+                        loading={saving}
+                        onComplete={handleSubmit}
                     />
-
-                    {/* CHIPS */}
-                    <div className="flex flex-wrap gap-2 mt-4">
-
-                        {tags.map((tag) => (
-
-                            <div
-                                key={tag}
-                                className="
-                                    flex items-center gap-2
-                                    px-3 py-1
-                                    rounded-full
-                                    bg-white/10
-                                    text-sm
-                                "
-                            >
-
-                                <span>
-                                    #{tag}
-                                </span>
-
-                                <button
-                                    onClick={() =>
-                                        removeTag(tag)
-                                    }
-                                    className="
-                                        text-zinc-400
-                                        hover:text-red-400
-                                        transition
-                                    "
-                                >
-                                    <X size={14} />
-                                </button>
-
-                            </div>
-                        ))}
-
-                    </div>
-
                 </div>
-
-                {/* BUTTON */}
-                <button
-                    onClick={handleSubmit}
-                    disabled={saving}
-                    className="
-                        w-full
-                        rounded-xl
-                        bg-white
-                        text-black
-                        py-3
-                        font-semibold
-                        transition
-                        hover:opacity-90
-                        disabled:opacity-50
-                    "
-                >
-                    {saving
-                        ? "Guardando..."
-                        : "Guardar cambios"}
-                </button>
 
             </div>
-
         </div>
     );
 }
