@@ -447,7 +447,7 @@ export default function PostDetailPage() {
                         by {post.user?.name}
                     </p>
 
-                    
+
 
                     {/* CONTENT */}
                     <p className="mt-6 text-zinc-200 leading-relaxed">
@@ -506,7 +506,9 @@ export default function PostDetailPage() {
                         <div className="flex gap-3 mt-4">
 
                             {/* EDIT */}
-                            <button
+                            
+                            <Link
+                                href={`/posts/${post.id}/edit`}
                                 className="
                                     text-blue-400
                                     hover:text-blue-300
@@ -514,8 +516,7 @@ export default function PostDetailPage() {
                                 "
                             >
                                 <Pencil size={18} />
-                            </button>
-
+                            </Link>
                             {/* DELETE */}
                             <button
                                 onClick={handleDeletePost}
@@ -532,7 +533,7 @@ export default function PostDetailPage() {
                     )}
 
                 </div>
-                
+
 
                 {/* COMMENTS */}
                 <div className="mt-10">
