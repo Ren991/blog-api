@@ -1,237 +1,237 @@
 "use client";
 
 import Link from "next/link";
+
 import { useState } from "react";
 
-import {
-  Heart,
-  MessageCircle,
-} from "lucide-react";
+import { Heart } from "lucide-react";
 
 import {
-  likePost,
-  unlikePost,
+    likePost,
+    unlikePost,
 } from "@/services/like.service";
 
-import { useAuth } from "@/app/context/AuthContext";
-
 type Tag = {
-  id: number;
-  name: string;
+    id: number;
+    name: string;
 };
 
 type Post = {
-  id: number;
-  title: string;
-  content: string;
+    id: number;
 
-  user: {
-    name: string;
-  };
+    title: string;
 
-  tags?: Tag[];
+    content: string;
 
-  likes_count?: number;
-  comments_count?: number;
+    user: {
+        name: string;
+    };
 
-  is_liked: boolean;
+    likes_count?: number;
+
+    is_liked: boolean;
+
+    comments_count?: number;
+
+    tags?: Tag[];
+};
+
+type Props = {
+    post: Post;
+
+    onTagClick?: (
+        tag: string
+    ) => void;
 };
 
 export default function PostCard({
-  post,
-}: {
-  post: Post;
-}) {
+    post,
+    onTagClick,
+}: Props) {
 
-  const { token } = useAuth();
+    const [liked, setLiked] =
+        useState(post.is_liked);
 
-  const [liked, setLiked] = useState(post.is_liked);
+    const [likesCount, setLikesCount] =
+        useState(
+            post.likes_count || 0
+        );
 
-  const [likesCount, setLikesCount] = useState(
-    post.likes_count || 0
-  );
+    const [loading, setLoading] =
+        useState(false);
 
-  const [loading, setLoading] = useState(false);
+    // =========================
+    // LIKE
+    // =========================
+    const handleLike = async () => {
 
-  // =========================
-  // LIKE
-  // =========================
-  const handleLike = async () => {
+        if (loading) return;
 
-    if (!token || loading) return;
+        setLoading(true);
 
-    try {
+        try {
 
-      setLoading(true);
+            if (liked) {
 
-      // optimistic UI
-      setLiked((prev) => !prev);
+                setLiked(false);
 
-      setLikesCount((prev) =>
-        liked ? prev - 1 : prev + 1
-      );
+                setLikesCount(
+                    (prev) => prev - 1
+                );
 
-      if (liked) {
+                await unlikePost(post.id);
 
-        await unlikePost(post.id);
+            } else {
 
-      } else {
+                setLiked(true);
 
-        await likePost(post.id);
-      }
+                setLikesCount(
+                    (prev) => prev + 1
+                );
 
-    } catch (err) {
-
-      console.error(err);
-
-      // rollback
-      setLiked((prev) => !prev);
-
-      setLikesCount((prev) =>
-        liked ? prev + 1 : prev - 1
-      );
-
-    } finally {
-
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div
-      className="
-        rounded-2xl
-        border border-white/10
-        bg-white/5
-        p-5
-        backdrop-blur-xl
-        hover:bg-white/10
-        transition
-      "
-    >
-
-      {/* USER */}
-      <div className="text-sm text-zinc-400">
-        {post.user.name}
-      </div>
-
-      {/* TITLE */}
-      <Link href={`/posts/${post.id}`}>
-
-        <h2
-          className="
-            mt-2
-            text-lg
-            font-semibold
-            hover:underline
-          "
-        >
-          {post.title}
-        </h2>
-
-      </Link>
-
-      {/* CONTENT */}
-      <p
-        className="
-          mt-2
-          text-sm
-          text-zinc-300
-          line-clamp-2
-        "
-      >
-        {post.content}
-      </p>
-
-      {/* TAGS */}
-      {post.tags && post.tags.length > 0 && (
-
-        <div className="flex flex-wrap gap-2 mt-4">
-
-          {post.tags.map((tag) => (
-
-            <button
-              key={tag.id}
-              className="
-                px-3 py-1
-                rounded-full
-                bg-white/10
-                text-xs
-                text-zinc-300
-                hover:bg-white/20
-                transition
-              "
-            >
-              #{tag.name}
-            </button>
-
-          ))}
-
-        </div>
-      )}
-
-      {/* ACTIONS */}
-      <div className="flex items-center gap-5 mt-5">
-
-        {/* LIKE */}
-        <button
-          onClick={handleLike}
-          disabled={loading}
-          className="
-            flex items-center gap-2
-            text-sm text-zinc-300
-            hover:text-white
-            transition
-          "
-        >
-
-          <Heart
-            size={18}
-            className={
-              liked
-                ? "fill-red-500 text-red-500"
-                : ""
+                await likePost(post.id);
             }
-          />
 
-          <span>
-            {likesCount}
-          </span>
+        } catch (err) {
 
-        </button>
+            console.error(err);
 
-        {/* COMMENTS */}
+            // rollback
+            setLiked(!liked);
+
+            setLikesCount((prev) =>
+                liked
+                    ? prev + 1
+                    : prev - 1
+            );
+
+        } finally {
+
+            setLoading(false);
+        }
+    };
+
+    // =========================
+    // UI
+    // =========================
+    return (
         <div
-          className="
-            flex items-center gap-2
-            text-sm text-zinc-300
-          "
+            className="
+                rounded-2xl
+                border border-white/10
+                bg-white/5
+                p-5
+                backdrop-blur-xl
+                hover:bg-white/10
+                transition
+            "
         >
 
-          <MessageCircle size={18} />
+            {/* USER */}
+            <div className="text-sm text-zinc-400">
 
-          <span>
-            {post.comments_count || 0}
-          </span>
+                {post.user.name}
+
+            </div>
+
+            {/* TITLE */}
+            <Link href={`/posts/${post.id}`}>
+
+                <h2
+                    className="
+                        mt-2
+                        text-lg
+                        font-semibold
+                        hover:underline
+                        text-white
+                    "
+                >
+                    {post.title}
+                </h2>
+
+            </Link>
+
+            {/* CONTENT */}
+            <p
+                className="
+                    mt-2
+                    text-sm
+                    text-zinc-300
+                    line-clamp-2
+                "
+            >
+                {post.content}
+            </p>
+
+            {/* TAGS */}
+            {post.tags &&
+                post.tags.length > 0 && (
+
+                    <div className="flex flex-wrap gap-2 mt-4">
+
+                        {post.tags.map((tag) => (
+
+                            <button
+                                key={tag.id}
+                                onClick={() =>
+                                    onTagClick?.(
+                                        `#${tag.name}`
+                                    )
+                                }
+                                className="
+                                    px-3 py-1
+                                    rounded-full
+                                    bg-blue-500/10
+                                    border border-blue-500/20
+                                    text-blue-300
+                                    text-xs
+                                    hover:bg-blue-500/20
+                                    transition
+                                "
+                            >
+                                #{tag.name}
+                            </button>
+
+                        ))}
+
+                    </div>
+                )}
+
+            {/* ACTIONS */}
+            <div className="flex items-center gap-4 mt-4">
+
+                {/* LIKE */}
+                <button
+                    onClick={handleLike}
+                    disabled={loading}
+                    className="
+                        flex items-center gap-2
+                        text-sm text-zinc-300
+                    "
+                >
+
+                    <Heart
+                        size={18}
+                        className={
+                            liked
+                                ? "fill-red-500 text-red-500"
+                                : ""
+                        }
+                    />
+
+                    {likesCount}
+
+                </button>
+
+                {/* COMMENTS */}
+                <div className="text-sm text-zinc-400">
+
+                    💬 {post.comments_count || 0}
+
+                </div>
+
+            </div>
 
         </div>
-
-        {/* DETAIL */}
-        <Link
-          href={`/posts/${post.id}`}
-          className="
-            ml-auto
-            text-sm
-            text-zinc-400
-            hover:text-white
-            transition
-          "
-        >
-          Ver más →
-        </Link>
-
-      </div>
-
-    </div>
-  );
+    );
 }

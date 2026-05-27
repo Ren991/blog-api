@@ -46,7 +46,8 @@ export default function PostFeed() {
     const [error, setError] =
         useState<string | null>(null);
 
-    const [search, setSearch] = useState("");
+    const [search, setSearch] =
+        useState("");
 
     // =========================
     // FETCH POSTS
@@ -130,26 +131,6 @@ export default function PostFeed() {
     }
 
     // =========================
-    // EMPTY POSTS
-    // =========================
-    /* if (posts.length === 0) {
-
-        return (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-zinc-400">
-
-                <p className="text-lg font-medium">
-                    No hay posts aún
-                </p>
-
-                <p className="text-sm">
-                    Sé el primero en publicar algo 🚀
-                </p>
-
-            </div>
-        );
-    } */
-
-    // =========================
     // UI
     // =========================
     return (
@@ -171,7 +152,6 @@ export default function PostFeed() {
                     Últimas publicaciones de la comunidad
                 </p>
 
-                {/* RESULTS */}
                 <p className="text-xs text-zinc-500 mt-2">
 
                     {posts.length} resultado
@@ -193,6 +173,9 @@ export default function PostFeed() {
                         <PostCard
                             key={post.id}
                             post={post}
+                            onTagClick={(tag) =>
+                                setSearch(tag)
+                            }
                         />
 
                     ))
@@ -201,7 +184,9 @@ export default function PostFeed() {
 
                     <div className="text-center text-zinc-500 py-10">
 
-                        No se encontraron posts
+                        {search
+                            ? "No se encontraron resultados"
+                            : "No hay posts aún"}
 
                     </div>
                 )}
