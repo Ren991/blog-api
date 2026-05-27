@@ -21,6 +21,7 @@ class PostResource extends JsonResource
             'comments' => CommentResource::collection(
                 $this->whenLoaded('comments')
             ),
+            'tags' => $this->tags,
             'is_liked' => auth()->check()
                 ? $this->likes->contains('user_id', auth()->id())
                 : false,
