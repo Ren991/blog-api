@@ -68,7 +68,7 @@ export default function FeedToolbar({
                 </div>
 
                 {/* BUTTON SEARCH */}
-                <button
+                {/* <button
                     onClick={handleSearch}
                     className="
                         px-5
@@ -83,7 +83,23 @@ export default function FeedToolbar({
                     "
                 >
                     Buscar
-                </button>
+                </button> */}
+                <button
+    onClick={handleSearch}
+    className="
+        flex items-center justify-center
+        w-12 h-12
+        rounded-2xl
+        bg-white/10
+        border border-white/10
+        text-white
+        hover:bg-white/20
+        transition
+    "
+    title="Buscar"
+>
+    <Search size={18} />
+</button>
             </div>
 
             {/* CREATE POST */}
