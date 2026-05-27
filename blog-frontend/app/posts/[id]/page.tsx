@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+
+import {
+    useParams,
+    useRouter,
+} from "next/navigation";
 
 import Swal from "sweetalert2";
+
+import Link from "next/link";
 
 import {
     Pencil,
@@ -11,8 +17,6 @@ import {
     Check,
     ArrowLeft,
 } from "lucide-react";
-
-import Link from "next/link";
 
 import { api } from "@/services/api";
 
@@ -28,6 +32,10 @@ import {
     deleteComment,
     updateComment,
 } from "@/services/comment.service";
+
+import {
+    deletePost,
+} from "@/services/post.service";
 
 type Comment = {
     id: number;
@@ -50,6 +58,7 @@ type Post = {
     content: string;
 
     user: {
+        id: number;
         name: string;
     };
 
@@ -65,6 +74,8 @@ type Post = {
 export default function PostDetailPage() {
 
     const { id } = useParams();
+
+    const router = useRouter();
 
     const { user } = useAuth();
 
@@ -82,7 +93,8 @@ export default function PostDetailPage() {
 
     const [loadingComment, setLoadingComment] = useState(false);
 
-    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editingId, setEditingId] =
+        useState<number | null>(null);
 
     const [editText, setEditText] = useState("");
 
@@ -120,6 +132,53 @@ export default function PostDetailPage() {
         fetchPost();
 
     }, [id]);
+
+    // =========================
+    // DELETE POST
+    // =========================
+    const handleDeletePost = async () => {
+
+        if (!post) return;
+
+        const confirm = await Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Este post será eliminado permanentemente",
+            icon: "warning",
+
+            showCancelButton: true,
+
+            confirmButtonText: "Sí, eliminar",
+
+            cancelButtonText: "Cancelar",
+
+            reverseButtons: true,
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        try {
+
+            await deletePost(post.id);
+
+            await Swal.fire({
+                icon: "success",
+                title: "Post eliminado",
+                timer: 1200,
+                showConfirmButton: false,
+            });
+
+            router.push("/");
+
+        } catch (err) {
+
+            console.error(err);
+
+            Swal.fire({
+                icon: "error",
+                title: "Error eliminando post",
+            });
+        }
+    };
 
     // =========================
     // LIKE
@@ -170,17 +229,21 @@ export default function PostDetailPage() {
     // =========================
     const handleComment = async () => {
 
-        if (!comment.trim() || !post || loadingComment)
-            return;
+        if (
+            !comment.trim() ||
+            !post ||
+            loadingComment
+        ) return;
 
         try {
 
             setLoadingComment(true);
 
-            const newComment = await createComment({
-                postId: post.id,
-                content: comment,
-            });
+            const newComment =
+                await createComment({
+                    postId: post.id,
+                    content: comment,
+                });
 
             setPost((prev) =>
                 prev
@@ -223,8 +286,11 @@ export default function PostDetailPage() {
         const confirm = await Swal.fire({
             title: "¿Desea eliminar el comentario?",
             icon: "warning",
+
             showCancelButton: true,
+
             confirmButtonText: "Sí, eliminar",
+
             cancelButtonText: "No",
         });
 
@@ -238,9 +304,11 @@ export default function PostDetailPage() {
                 prev
                     ? {
                         ...prev,
-                        comments: prev.comments?.filter(
-                            (c) => c.id !== commentId
-                        ),
+                        comments:
+                            prev.comments?.filter(
+                                (c) =>
+                                    c.id !== commentId
+                            ),
                     }
                     : prev
             );
@@ -281,12 +349,13 @@ export default function PostDetailPage() {
                 prev
                     ? {
                         ...prev,
-                        comments: prev.comments?.map(
-                            (c) =>
-                                c.id === id
-                                    ? updated
-                                    : c
-                        ),
+                        comments:
+                            prev.comments?.map(
+                                (c) =>
+                                    c.id === id
+                                        ? updated
+                                        : c
+                            ),
                     }
                     : prev
             );
@@ -378,6 +447,8 @@ export default function PostDetailPage() {
                         by {post.user?.name}
                     </p>
 
+                    
+
                     {/* CONTENT */}
                     <p className="mt-6 text-zinc-200 leading-relaxed">
                         {post.content}
@@ -429,7 +500,39 @@ export default function PostDetailPage() {
                         ❤️ {likesCount}
                     </button>
 
+                    {/* OWNER ACTIONS */}
+                    {user?.id === post.user.id && (
+
+                        <div className="flex gap-3 mt-4">
+
+                            {/* EDIT */}
+                            <button
+                                className="
+                                    text-blue-400
+                                    hover:text-blue-300
+                                    transition
+                                "
+                            >
+                                <Pencil size={18} />
+                            </button>
+
+                            {/* DELETE */}
+                            <button
+                                onClick={handleDeletePost}
+                                className="
+                                    text-red-400
+                                    hover:text-red-300
+                                    transition
+                                "
+                            >
+                                <Trash2 size={18} />
+                            </button>
+
+                        </div>
+                    )}
+
                 </div>
+                
 
                 {/* COMMENTS */}
                 <div className="mt-10">
@@ -438,7 +541,7 @@ export default function PostDetailPage() {
                         Comentarios
                     </h2>
 
-                    {/* CREATE COMMENT */}
+                    {/* INPUT */}
                     <div className="flex gap-2 mb-6">
 
                         <input
@@ -473,7 +576,7 @@ export default function PostDetailPage() {
 
                     </div>
 
-                    {/* LIST */}
+                    {/* COMMENTS LIST */}
                     <div className="space-y-3">
 
                         {post.comments?.length ? (
@@ -490,13 +593,11 @@ export default function PostDetailPage() {
                                     "
                                 >
 
-                                    {/* USER */}
                                     <p className="text-sm text-zinc-400">
                                         {c.user?.name ??
                                             "Usuario"}
                                     </p>
 
-                                    {/* EDIT MODE */}
                                     {editingId === c.id ? (
 
                                         <div className="flex gap-2 mt-2">
@@ -527,7 +628,6 @@ export default function PostDetailPage() {
                                                     hover:text-green-300
                                                     transition
                                                 "
-                                                title="Guardar"
                                             >
                                                 <Check size={18} />
                                             </button>
@@ -541,7 +641,6 @@ export default function PostDetailPage() {
                                         </p>
                                     )}
 
-                                    {/* ACTIONS */}
                                     {user?.id ===
                                         c.user?.id &&
                                         editingId !==
@@ -549,7 +648,6 @@ export default function PostDetailPage() {
 
                                             <div className="flex gap-3 mt-3">
 
-                                                {/* EDIT */}
                                                 <button
                                                     onClick={() =>
                                                         handleEdit(
@@ -562,14 +660,9 @@ export default function PostDetailPage() {
                                                         transition
                                                     "
                                                 >
-                                                    <Pencil
-                                                        size={
-                                                            18
-                                                        }
-                                                    />
+                                                    <Pencil size={18} />
                                                 </button>
 
-                                                {/* DELETE */}
                                                 <button
                                                     onClick={() =>
                                                         handleDelete(
@@ -582,11 +675,7 @@ export default function PostDetailPage() {
                                                         transition
                                                     "
                                                 >
-                                                    <Trash2
-                                                        size={
-                                                            18
-                                                        }
-                                                    />
+                                                    <Trash2 size={18} />
                                                 </button>
 
                                             </div>

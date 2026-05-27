@@ -27,3 +27,26 @@ export const createPost = async ({
 
   return res.data.data;
 };
+
+export const updatePost = async (
+  id: number,
+  data: {
+    title: string;
+    content: string;
+    tags: string[];
+  }
+) => {
+
+  const res = await api.put(`/posts/${id}`, data);
+
+  return res.data.data;
+};
+
+export const deletePost = async (
+  id: number
+) => {
+
+  const res = await api.delete(`/posts/${id}`);
+
+  return res.data;
+};
