@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 
 import { X } from "lucide-react";
-
+import SlideToPost from "@/components/ui/SlideToPost";
 import { createPost } from "@/services/post.service";
 
 export default function CreatePostPage() {
@@ -63,8 +63,7 @@ export default function CreatePostPage() {
     // =========================
     // CREATE POST
     // =========================
-    const handleCreatePost = async () => {
-
+    const handleCreatePost = async (): Promise<boolean> => {
         if (!title.trim() || !content.trim()) {
 
             Swal.fire({
@@ -72,7 +71,7 @@ export default function CreatePostPage() {
                 title: "Completa todos los campos",
             });
 
-            return;
+            return false;
         }
 
         try {
@@ -93,6 +92,8 @@ export default function CreatePostPage() {
             });
 
             router.push("/");
+            return true
+
 
         } catch (err) {
 
@@ -102,6 +103,7 @@ export default function CreatePostPage() {
                 icon: "error",
                 title: "Error al crear el post",
             });
+            return false
 
         } finally {
 
@@ -232,7 +234,7 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* BUTTON */}
-                <button
+               {/*  <button
                     onClick={handleCreatePost}
                     disabled={loading}
                     className="
@@ -250,7 +252,11 @@ export default function CreatePostPage() {
                     {loading
                         ? "Publicando..."
                         : "Publicar"}
-                </button>
+                </button> */}
+                <SlideToPost
+    onComplete={handleCreatePost}
+    loading={loading}
+/>
 
             </div>
         </div>
