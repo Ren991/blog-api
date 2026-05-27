@@ -132,7 +132,7 @@ export default function PostFeed() {
     // =========================
     // EMPTY POSTS
     // =========================
-    if (posts.length === 0) {
+    /* if (posts.length === 0) {
 
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-zinc-400">
@@ -147,7 +147,7 @@ export default function PostFeed() {
 
             </div>
         );
-    }
+    } */
 
     // =========================
     // UI
