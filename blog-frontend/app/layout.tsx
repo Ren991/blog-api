@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "El Bloque de Código",
+  title: "Merge Conflict",
   description: "Modern blog platform",
 };
 

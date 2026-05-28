@@ -266,9 +266,16 @@ export default function PostDetailPage() {
                 showConfirmButton: false,
             });
 
-        } catch (err) {
+        } catch (err: any) {
+            console.log(err.response.data.message)
+            const message =
+                err.response.data.message ||
+                "Error al crear el post";
 
-            console.error(err);
+            Swal.fire({
+                icon: "error",
+                title: message,
+            });
 
         } finally {
 

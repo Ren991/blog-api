@@ -96,14 +96,17 @@ export default function CreatePostPage() {
             return true
 
 
-        } catch (err) {
+        } catch (err:any) {
 
-            console.error(err);
+            console.log(err.response.data.message)
+            const message =
+        err.response.data.message ||
+        "Error al crear el post";
 
-            Swal.fire({
-                icon: "error",
-                title: "Error al crear el post",
-            });
+    Swal.fire({
+        icon: "error",
+        title: message,
+    });
             return false
 
         } finally {

@@ -6,8 +6,9 @@ use App\Models\Post;
 use App\Models\Tag;
 
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
 use App\Http\Resources\PostResource;
+use Illuminate\Support\Facades\Cache;
 
 class PostController extends Controller
 {
@@ -108,6 +109,25 @@ class PostController extends Controller
             'tags' => 'nullable|array',
             'tags.*' => 'string|max:50',
         ]);
+
+        /**
+         * =========================
+         * RATE LIMITE
+         * =========================
+         */
+        $userId = auth()->id();
+
+        $key = "posts:{$userId}:" . now()->format('Y-m-d');
+
+        $count = Cache::get($key, 0);
+
+        if ($count >= 1) {
+            return response()->json([
+                'message' => 'Límite de 20 posts por día alcanzado'
+            ], 429);
+        }
+
+        Cache::put($key, $count + 1, now()->addDay());
 
         /**
          * =========================

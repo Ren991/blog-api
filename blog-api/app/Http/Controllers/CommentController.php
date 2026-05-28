@@ -6,6 +6,8 @@ use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Http\Resources\CommentResource;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class CommentController extends Controller
 {
@@ -22,6 +24,26 @@ class CommentController extends Controller
             'content' => 'required|string',
             'post_id' => 'required|exists:posts,id'
         ]);
+
+        /**
+         * =========================
+         * RATE LIMITING
+         * =========================
+         */
+
+        $userId = auth()->id();
+
+        $key = "comments:{$userId}:" . now()->format('Y-m-d-H');
+
+        $count = Cache::get($key, 0);
+
+        if ($count >= 1) {
+            return response()->json([
+                'message' => 'Límite de 20 comentarios por hora alcanzado'
+            ], 429);
+        }
+
+        Cache::put($key, $count + 1, now()->addHour());
 
         $comment = Comment::create([
             'content' => $validated['content'],
