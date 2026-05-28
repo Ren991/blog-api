@@ -3,6 +3,7 @@
 import {
     Search,
     Plus,
+    Trash
 } from "lucide-react";
 
 import Link from "next/link";
@@ -87,16 +88,7 @@ export default function FeedToolbar({
                     {/* INPUT */}
                     <div className="relative flex-1">
 
-                        <Search
-                            size={18}
-                            className="
-                                absolute
-                                left-4
-                                top-1/2
-                                -translate-y-1/2
-                                text-zinc-500
-                            "
-                        />
+                        
 
                         <input
                             value={value}
@@ -126,6 +118,32 @@ Buscar posts, contenido o #tags...
                         />
 
                     </div>
+
+                    {/* CLEAR */}
+    {value.trim().length > 0 && (
+
+        <button
+            onClick={() => {
+
+                setValue("");
+
+                onSearch("");
+            }}
+            className="
+                flex items-center justify-center
+                w-12 h-12
+                rounded-2xl
+                bg-red-500/10
+                border border-red-500/20
+                text-red-300
+                hover:bg-red-500/20
+                transition
+            "
+            title="Limpiar búsqueda"
+        >
+            <Trash size={18} />
+        </button>
+    )}
 
                     {/* BUTTON SEARCH */}
                     <button
