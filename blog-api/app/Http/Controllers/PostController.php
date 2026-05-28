@@ -17,74 +17,145 @@ class PostController extends Controller
      * LIST POSTS
      * =========================
      */
-    public function index(Request $request)
+      public function index(Request $request)
 {
     $query = Post::with([
             'user',
             'comments.user',
+            'comments.replies.user',
             'tags',
             'likes'
         ])
-        ->withCount(['comments', 'likes']);
+        ->withCount([
+            'comments',
+            'likes'
+        ]);
 
-    // =========================
-    // SEARCH PARSER
-    // =========================
+    /**
+     * =========================
+     * GLOBAL SEARCH
+     * =========================
+     *
+     * soporta:
+     *
+     * react
+     * hola mundo
+     * #react
+     * #react #php
+     * react #php
+     * react backend #laravel
+     *
+     */
+
     if ($request->filled('search')) {
 
-        $search = $request->search;
-        $words = explode(' ', $search);
+        $search = trim($request->search);
+
+        $words = preg_split('/\s+/', $search);
 
         $tags = [];
         $textWords = [];
 
         foreach ($words as $word) {
+
+            $word = trim($word);
+
+            if (!$word) {
+                continue;
+            }
+
+            // TAG
             if (str_starts_with($word, '#')) {
-                $tags[] = strtolower(str_replace('#', '', $word));
+
+                $tag = strtolower(
+                    ltrim($word, '#')
+                );
+
+                if ($tag !== '') {
+                    $tags[] = $tag;
+                }
+
             } else {
+
                 $textWords[] = $word;
             }
         }
 
-        // =========================
-        // TEXT FILTER (title + content)
-        // =========================
-       if (!empty($textWords)) {
+        /**
+         * =========================
+         * TEXT SEARCH
+         * =========================
+         */
+
+        if (!empty($textWords)) {
 
             $query->where(function ($q) use ($textWords) {
 
                 foreach ($textWords as $word) {
-                    $q->orWhere('title', 'like', "%{$word}%")
-                    ->orWhere('content', 'like', "%{$word}%");
+
+                    $q->where(function ($sub) use ($word) {
+
+                        $sub->where(
+                            'title',
+                            'like',
+                            "%{$word}%"
+                        )
+                        ->orWhere(
+                            'content',
+                            'like',
+                            "%{$word}%"
+                        );
+                    });
                 }
             });
         }
 
-        // =========================
-        // TAG FILTER
-        // =========================
+        /**
+         * =========================
+         * TAG SEARCH
+         * =========================
+         */
+
         if (!empty($tags)) {
-            $query->whereHas('tags', function ($q) use ($tags) {
-                $q->whereIn('name', $tags);
-            });
+
+            foreach ($tags as $tag) {
+
+                $query->whereHas('tags', function ($q) use ($tag) {
+
+                    $q->where(
+                        'name',
+                        $tag
+                    );
+                });
+            }
         }
     }
 
-    // =========================
-    // FILTER BY SINGLE TAG (?tag=react)
-    // =========================
-    if ($request->has('tag')) {
+    /**
+     * =========================
+     * SINGLE TAG FILTER
+     * =========================
+     */
+
+    if ($request->filled('tag')) {
+
         $tag = strtolower($request->tag);
 
         $query->whereHas('tags', function ($q) use ($tag) {
+
             $q->where('name', $tag);
         });
     }
 
-    // =========================
-    // PAGINATION
-    // =========================
-    $posts = $query->latest()->paginate(10);
+    /**
+     * =========================
+     * PAGINATION
+     * =========================
+     */
+
+    $posts = $query
+        ->latest()
+        ->paginate(10);
 
     return response()->json([
         'data' => PostResource::collection($posts),
@@ -121,7 +192,7 @@ class PostController extends Controller
 
         $count = Cache::get($key, 0);
 
-        if ($count >= 1) {
+        if ($count >= 10) {
             return response()->json([
                 'message' => 'Límite de 20 posts por día alcanzado'
             ], 429);

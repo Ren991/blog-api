@@ -51,7 +51,7 @@ export default function PostCard({
     post,
     onTagClick,
 }: Props) {
-  console.log(post)
+    console.log(post)
     const [liked, setLiked] =
         useState(post.is_liked);
 
@@ -133,7 +133,7 @@ export default function PostCard({
             {/* USER */}
             <div className="text-sm text-zinc-400">
 
-                {post.user.name}
+               Creado por : {post.user.name}
 
             </div>
 
@@ -234,12 +234,12 @@ export default function PostCard({
                 </div>
 
 
-                 {/* DATE */}
-    <div className="ml-auto text-xs text-zinc-500">
+                {/* DATE */}
+                <div className="ml-auto text-xs text-zinc-500">
 
-        {new Date(post.created_at).toLocaleDateString()}
+                    {new Date(post.created_at).toLocaleDateString()}
 
-    </div>
+                </div>
 
             </div>
 
