@@ -40,6 +40,7 @@ import {
 type Comment = {
     id: number;
     content: string;
+    created_at: string;
 
     parent_id?: number | null;
 
@@ -673,6 +674,10 @@ export default function PostDetailPage() {
                                     <p className="text-sm text-zinc-400">
                                         {c.user?.name ?? "Usuario"}
                                     </p>
+                                    <span className="text-zinc-600 text-xs">
+                                        •
+                                        {new Date(c.created_at).toLocaleString()}
+                                    </span>
 
                                     {editingId === c.id ? (
 
@@ -811,23 +816,33 @@ export default function PostDetailPage() {
                                                 {c.replies.map((reply) => (
 
                                                     <div
-                                                        key={reply.id}
-                                                        className="
-                                                            border-l
-                                                            border-white/10
-                                                            pl-4
-                                                        "
-                                                    >
+    key={reply.id}
+    className="
+        border-l
+        border-white/10
+        pl-4
+    "
+>
 
-                                                        <p className="text-xs text-zinc-500">
-                                                            {reply.user?.name}
-                                                        </p>
+    <div className="flex items-center justify-between">
 
-                                                        <p className="text-sm text-zinc-200 mt-1">
-                                                            {reply.content}
-                                                        </p>
+        <p className="text-xs text-zinc-500">
+            {reply.user?.name}
+        </p>
 
-                                                    </div>
+        <span className="text-zinc-600 text-xs">
+            {new Date(
+                reply.created_at
+            ).toLocaleString()}
+        </span>
+
+    </div>
+
+    <p className="text-sm text-zinc-200 mt-1">
+        {reply.content}
+    </p>
+
+</div>
                                                 ))}
 
                                             </div>
