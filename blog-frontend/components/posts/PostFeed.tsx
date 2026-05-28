@@ -1,201 +1,153 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/app/context/AuthContext";
-
 import { getPosts } from "@/services/post.service";
-
 import PostCard from "./PostCard";
-
 import FeedToolbar from "../feed/FeedToolbar";
 
-type Tag = {
-    id: number;
-    name: string;
-};
-
 type Post = {
-    id: number;
-
-    title: string;
-
-    content: string;
-
-    created_at: string;
-
-
-    user: {
-        name: string;
-    };
-
-    likes_count?: number;
-
-    is_liked: boolean;
-
-    comments_count?: number;
-
-    tags?: Tag[];
+  id: number;
+  title: string;
+  content: string;
+  created_at: string;
+  user: { name: string };
+  likes_count?: number;
+  is_liked: boolean;
+  comments_count?: number;
 };
 
 export default function PostFeed() {
+  const { token } = useAuth();
 
-    const { token } = useAuth();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
 
-    const [posts, setPosts] = useState<Post[]>([]);
+  const observer = useRef<IntersectionObserver | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
-    const [loading, setLoading] = useState(true);
+  // =========================
+  // RESET when search changes
+  // =========================
+  useEffect(() => {
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
+  }, [search]);
 
-    const [error, setError] =
-        useState<string | null>(null);
+  // =========================
+  // FETCH POSTS
+  // =========================
+  const fetchPosts = useCallback(
+    async (pageNumber: number, searchValue: string) => {
+      if (!token) return;
+      if (loading) return;
 
-    const [search, setSearch] =
-        useState("");
+      // abort previous request
+      if (abortRef.current) {
+        abortRef.current.abort();
+      }
 
-    // =========================
-    // FETCH POSTS
-    // =========================
-    useEffect(() => {
+      const controller = new AbortController();
+      abortRef.current = controller;
 
-        const fetchPosts = async () => {
+      try {
+        setLoading(true);
 
-            if (!token) return;
-
-            try {
-
-                setLoading(true);
-
-                const data = await getPosts(
-                    token,
-                    search
-                );
-
-                setPosts(data);
-
-            } catch (err) {
-
-                console.error(err);
-
-                setError(
-                    "Error cargando posts"
-                );
-
-            } finally {
-
-                setLoading(false);
-            }
-        };
-
-        fetchPosts();
-
-    }, [token, search]);
-
-    // =========================
-    // LOADING
-    // =========================
-    if (loading) {
-
-        return (
-            <div className="mx-auto max-w-2xl px-6 py-10 space-y-4">
-
-                <div className="h-6 w-40 bg-white/10 rounded animate-pulse" />
-
-                {Array.from({ length: 4 }).map(
-                    (_, i) => (
-                        <div
-                            key={i}
-                            className="
-                                h-32
-                                rounded-2xl
-                                bg-white/5
-                                border border-white/10
-                                animate-pulse
-                            "
-                        />
-                    )
-                )}
-
-            </div>
+        const data = await getPosts(
+          pageNumber,
+          searchValue,
+          controller.signal
         );
-    }
 
-    // =========================
-    // ERROR
-    // =========================
-    if (error) {
-
-        return (
-            <div className="flex items-center justify-center h-[60vh] text-red-400">
-
-                {error}
-
-            </div>
+        setPosts((prev) =>
+          pageNumber === 1
+            ? data.data
+            : [...prev, ...data.data]
         );
-    }
 
-    // =========================
-    // UI
-    // =========================
-    return (
-        <div className="mx-auto max-w-2xl px-6 py-10">
+        setHasMore(pageNumber < data.last_page);
+      } catch (err: any) {
+        if (err.name !== "CanceledError") {
+          console.error(err);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token, loading]
+  );
 
-            {/* TOOLBAR */}
-            <FeedToolbar
-                onSearch={setSearch}
-            />
+  // =========================
+  // INITIAL + PAGE FETCH
+  // =========================
+  useEffect(() => {
+    if (!token) return;
+    fetchPosts(page, search);
+  }, [page, search, token]);
 
-            {/* HEADER */}
-            <div className="mb-6">
+  // =========================
+  // INFINITE SCROLL
+  // =========================
+  const lastPostRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading) return;
 
-                <h1 className="text-2xl font-bold text-white">
-                    Feed
-                </h1>
+      if (observer.current) {
+        observer.current.disconnect();
+      }
 
-                <p className="text-sm text-zinc-400">
-                    Últimas publicaciones de la comunidad
-                </p>
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((prev) => prev + 1);
+        }
+      });
 
-                <p className="text-xs text-zinc-500 mt-2">
+      if (node) {
+        observer.current.observe(node);
+      }
+    },
+    [loading, hasMore]
+  );
 
-                    {posts.length} resultado
-                    {posts.length !== 1
-                        ? "s"
-                        : ""}
+  // =========================
+  // UI
+  // =========================
+  return (
+    <div className="mx-auto max-w-2xl px-6 py-10">
+      <FeedToolbar onSearch={setSearch} />
 
-                </p>
+      <h1 className="text-2xl font-bold mb-6">Feed</h1>
 
+      <div className="space-y-4">
+        {posts.map((post, index) => {
+          const isLast = index === posts.length - 1;
+
+          return (
+            <div
+              key={post.id}
+              ref={isLast ? lastPostRef : null}
+            >
+              <PostCard post={post} />
             </div>
+          );
+        })}
+      </div>
 
-            {/* POSTS */}
-            <div className="space-y-4">
+      {loading && (
+        <p className="text-center text-zinc-400 mt-6">
+          Cargando más posts...
+        </p>
+      )}
 
-                {posts.length > 0 ? (
-
-                    posts.map((post) => (
-
-                        <PostCard
-                            key={post.id}
-                            post={post}
-                            onTagClick={(tag) =>
-                                setSearch(tag)
-                            }
-                        />
-
-                    ))
-
-                ) : (
-
-                    <div className="text-center text-zinc-500 py-10">
-
-                        {search
-                            ? "No se encontraron resultados"
-                            : "No hay posts aún"}
-
-                    </div>
-                )}
-
-            </div>
-
-        </div>
-    );
+      {!hasMore && posts.length > 0 && (
+        <p className="text-center text-zinc-500 mt-6">
+          No hay más posts
+        </p>
+      )}
+    </div>
+  );
 }

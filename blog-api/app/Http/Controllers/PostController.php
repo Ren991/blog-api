@@ -17,112 +17,81 @@ class PostController extends Controller
      * =========================
      */
     public function index(Request $request)
-    {
-        $query = Post::with([
-                'user',
-                'comments.user',
-                'tags',
-                'likes'
-            ])
-            ->withCount([
-                'comments',
-                'likes'
-            ]);
+{
+    $query = Post::with([
+            'user',
+            'comments.user',
+            'tags',
+            'likes'
+        ])
+        ->withCount(['comments', 'likes']);
 
-        /**
-         * =========================
-         * SEARCH
-         * =========================
-         */
-        if ($request->filled('search')) {
+    // =========================
+    // SEARCH PARSER
+    // =========================
+    if ($request->filled('search')) {
 
-    $search = $request->search;
+        $search = $request->search;
+        $words = explode(' ', $search);
 
-    $words = explode(' ', $search);
+        $tags = [];
+        $textWords = [];
 
-    $tags = [];
-    $text = [];
+        foreach ($words as $word) {
+            if (str_starts_with($word, '#')) {
+                $tags[] = strtolower(str_replace('#', '', $word));
+            } else {
+                $textWords[] = $word;
+            }
+        }
 
-    foreach ($words as $word) {
+        // =========================
+        // TEXT FILTER (title + content)
+        // =========================
+       if (!empty($textWords)) {
 
-        if (str_starts_with($word, '#')) {
+            $query->where(function ($q) use ($textWords) {
 
-            $tags[] = strtolower(
-                str_replace('#', '', $word)
-            );
+                foreach ($textWords as $word) {
+                    $q->orWhere('title', 'like', "%{$word}%")
+                    ->orWhere('content', 'like', "%{$word}%");
+                }
+            });
+        }
 
-        } else {
-
-            $text[] = $word;
+        // =========================
+        // TAG FILTER
+        // =========================
+        if (!empty($tags)) {
+            $query->whereHas('tags', function ($q) use ($tags) {
+                $q->whereIn('name', $tags);
+            });
         }
     }
 
     // =========================
-    // TEXT SEARCH
+    // FILTER BY SINGLE TAG (?tag=react)
     // =========================
-    if (!empty($text)) {
+    if ($request->has('tag')) {
+        $tag = strtolower($request->tag);
 
-        $textSearch = implode(' ', $text);
-
-        $query->where(function ($q) use ($textSearch) {
-
-            $q->where(
-                'title',
-                'like',
-                "%{$textSearch}%"
-            )
-            ->orWhere(
-                'content',
-                'like',
-                "%{$textSearch}%"
-            );
+        $query->whereHas('tags', function ($q) use ($tag) {
+            $q->where('name', $tag);
         });
     }
 
     // =========================
-    // TAG SEARCH
+    // PAGINATION
     // =========================
-    if (!empty($tags)) {
+    $posts = $query->latest()->paginate(10);
 
-                $query->whereHas(
-                    'tags',
-                    function ($q) use ($tags) {
-
-                        $q->whereIn(
-                            'name',
-                            $tags
-                        );
-                    }
-                );
-            }
-        }
-
-        /**
-         * =========================
-         * FILTER BY TAG
-         * =========================
-         */
-        if ($request->has('tag')) {
-
-            $tag = strtolower($request->tag);
-
-            $query->whereHas('tags', function ($q) use ($tag) {
-
-                $q->where('name', $tag);
-            });
-        }
-
-        /**
-         * =========================
-         * ORDER + PAGINATION
-         * =========================
-         */
-        $posts = $query
-            ->latest()
-            ->paginate(10);
-
-        return PostResource::collection($posts);
-    }
+    return response()->json([
+        'data' => PostResource::collection($posts),
+        'current_page' => $posts->currentPage(),
+        'last_page' => $posts->lastPage(),
+        'total' => $posts->total(),
+    ]);
+}
 
     /**
      * =========================

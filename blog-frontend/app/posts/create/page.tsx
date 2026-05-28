@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 
 import Swal from "sweetalert2";
 
-import { X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
 import SlideToPost from "@/components/ui/SlideToPost";
 import { createPost } from "@/services/post.service";
+import Link from "next/link";
 
 export default function CreatePostPage() {
     const router = useRouter();
@@ -115,7 +116,26 @@ export default function CreatePostPage() {
         <div className="max-w-2xl mx-auto px-6 py-10 text-white">
 
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-
+                {/* BACK */}
+                <Link
+                    href="/"
+                    className="
+                    absolute left-6 top-6 z-50
+                    flex items-center gap-2
+                    rounded-full
+                    border border-white/10
+                    bg-white/5
+                    px-4 py-2
+                    text-sm text-zinc-300
+                    backdrop-blur-xl
+                    transition
+                    hover:bg-white/10
+                    hover:text-white
+                "
+                >
+                    <ArrowLeft size={16} />
+                    Volver
+                </Link>
                 {/* TITLE */}
                 <h1 className="text-3xl font-bold mb-6">
                     Crear publicación
@@ -234,7 +254,7 @@ export default function CreatePostPage() {
                 </div>
 
                 {/* BUTTON */}
-               {/*  <button
+                {/*  <button
                     onClick={handleCreatePost}
                     disabled={loading}
                     className="
@@ -254,9 +274,9 @@ export default function CreatePostPage() {
                         : "Publicar"}
                 </button> */}
                 <SlideToPost
-    onComplete={handleCreatePost}
-    loading={loading}
-/>
+                    onComplete={handleCreatePost}
+                    loading={loading}
+                />
 
             </div>
         </div>

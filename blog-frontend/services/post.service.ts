@@ -9,7 +9,7 @@ import { api } from "./api";
 
   return res.data.data;
 }; */
-export const getPosts = async (
+/* export const getPosts = async (
     token: string,
     search?: string
 ) => {
@@ -21,6 +21,21 @@ export const getPosts = async (
     });
 
     return res.data.data;
+}; */
+export const getPosts = async (
+  page: number,
+  search: string,
+  signal?: AbortSignal
+) => {
+  const res = await api.get("/posts", {
+    params: {
+      page,
+      search,
+    },
+    signal,
+  });
+
+  return res.data;
 };
 
 export const createPost = async ({
