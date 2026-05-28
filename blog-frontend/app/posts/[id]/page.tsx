@@ -362,52 +362,47 @@ export default function PostDetailPage() {
     // DELETE COMMENT
     // =========================
     const handleDelete = async (
-        commentId: number
-    ) => {
+    commentId: number
+) => {
 
-        const confirm = await Swal.fire({
-            title: "¿Desea eliminar el comentario?",
-            icon: "warning",
+    const confirm = await Swal.fire({
+        title: "¿Eliminar comentario?",
+        icon: "warning",
+        showCancelButton: true,
+    });
 
-            showCancelButton: true,
+    if (!confirm.isConfirmed) return;
 
-            confirmButtonText: "Sí, eliminar",
+    try {
 
-            cancelButtonText: "No",
+        await deleteComment(commentId);
+
+        setPost((prev) => {
+
+            if (!prev) return prev;
+
+            return {
+
+                ...prev,
+
+                comments: prev.comments?.filter(
+                    (c) => c.id !== commentId
+                ).map((c) => ({
+
+                    ...c,
+
+                    replies: c.replies?.filter(
+                        (r) => r.id !== commentId
+                    ) || [],
+                })),
+            };
         });
 
-        if (!confirm.isConfirmed) return;
+    } catch (err) {
 
-        try {
-
-            await deleteComment(commentId);
-
-            setPost((prev) =>
-                prev
-                    ? {
-                        ...prev,
-
-                        comments:
-                            prev.comments?.filter(
-                                (c) =>
-                                    c.id !== commentId
-                            ),
-                    }
-                    : prev
-            );
-
-            Swal.fire({
-                icon: "success",
-                title: "Comentario eliminado",
-                timer: 1200,
-                showConfirmButton: false,
-            });
-
-        } catch (err) {
-
-            console.error(err);
-        }
-    };
+        console.error(err);
+    }
+};
 
     // =========================
     // EDIT COMMENT
@@ -816,33 +811,53 @@ export default function PostDetailPage() {
                                                 {c.replies.map((reply) => (
 
                                                     <div
-    key={reply.id}
-    className="
+                                                        key={reply.id}
+                                                        className="
         border-l
         border-white/10
         pl-4
     "
->
+                                                    >
 
-    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center justify-between">
 
-        <p className="text-xs text-zinc-500">
-            {reply.user?.name}
-        </p>
+                                                            <p className="text-xs text-zinc-500">
+                                                                {reply.user?.name}
+                                                            </p>
 
-        <span className="text-zinc-600 text-xs">
-            {new Date(
-                reply.created_at
-            ).toLocaleString()}
-        </span>
+                                                            {user?.id === reply.user?.id && (
 
-    </div>
+                                                                <div className="flex gap-3 mt-2">
 
-    <p className="text-sm text-zinc-200 mt-1">
-        {reply.content}
-    </p>
+                                                                    <button
+                                                                        onClick={() =>
+                                                                            handleDelete(reply.id)
+                                                                        }
+                                                                        className="
+                text-red-400
+                hover:text-red-300
+                transition
+            "
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
 
-</div>
+                                                                </div>
+                                                            )}
+
+                                                            <span className="text-zinc-600 text-xs">
+                                                                {new Date(
+                                                                    reply.created_at
+                                                                ).toLocaleString()}
+                                                            </span>
+
+                                                        </div>
+
+                                                        <p className="text-sm text-zinc-200 mt-1">
+                                                            {reply.content}
+                                                        </p>
+
+                                                    </div>
                                                 ))}
 
                                             </div>

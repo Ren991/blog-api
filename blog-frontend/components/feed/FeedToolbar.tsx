@@ -88,7 +88,7 @@ export default function FeedToolbar({
                     {/* INPUT */}
                     <div className="relative flex-1">
 
-                        
+
 
                         <input
                             value={value}
@@ -120,16 +120,16 @@ Buscar posts, contenido o #tags...
                     </div>
 
                     {/* CLEAR */}
-    {value.trim().length > 0 && (
+                    {value.trim().length > 0 && (
 
-        <button
-            onClick={() => {
+                        <button
+                            onClick={() => {
 
-                setValue("");
+                                setValue("");
 
-                onSearch("");
-            }}
-            className="
+                                onSearch("");
+                            }}
+                            className="
                 flex items-center justify-center
                 w-12 h-12
                 rounded-2xl
@@ -139,11 +139,11 @@ Buscar posts, contenido o #tags...
                 hover:bg-red-500/20
                 transition
             "
-            title="Limpiar búsqueda"
-        >
-            <Trash size={18} />
-        </button>
-    )}
+                            title="Limpiar búsqueda"
+                        >
+                            <Trash size={18} />
+                        </button>
+                    )}
 
                     {/* BUTTON SEARCH */}
                     <button
