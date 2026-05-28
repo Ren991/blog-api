@@ -41,6 +41,10 @@ type Comment = {
     id: number;
     content: string;
 
+    parent_id?: number | null;
+
+    replies?: Comment[];
+
     user?: {
         id: number;
         name: string;
@@ -57,6 +61,7 @@ type Post = {
     title: string;
     content: string;
     created_at: string;
+
     user: {
         id: number;
         name: string;
@@ -79,24 +84,41 @@ export default function PostDetailPage() {
 
     const { user } = useAuth();
 
-    const [post, setPost] = useState<Post | null>(null);
+    const [post, setPost] =
+        useState<Post | null>(null);
 
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] =
+        useState(true);
 
-    const [comment, setComment] = useState("");
+    const [comment, setComment] =
+        useState("");
 
-    const [isLiked, setIsLiked] = useState(false);
+    const [isLiked, setIsLiked] =
+        useState(false);
 
-    const [likesCount, setLikesCount] = useState(0);
+    const [likesCount, setLikesCount] =
+        useState(0);
 
-    const [loadingLike, setLoadingLike] = useState(false);
+    const [loadingLike, setLoadingLike] =
+        useState(false);
 
-    const [loadingComment, setLoadingComment] = useState(false);
+    const [loadingComment, setLoadingComment] =
+        useState(false);
 
     const [editingId, setEditingId] =
         useState<number | null>(null);
 
-    const [editText, setEditText] = useState("");
+    const [editText, setEditText] =
+        useState("");
+
+    // =========================
+    // REPLIES
+    // =========================
+    const [replyingTo, setReplyingTo] =
+        useState<number | null>(null);
+
+    const [replyText, setReplyText] =
+        useState("");
 
     // =========================
     // FETCH POST
@@ -191,7 +213,6 @@ export default function PostDetailPage() {
 
             setLoadingLike(true);
 
-            // optimistic UI
             setIsLiked((prev) => !prev);
 
             setLikesCount((prev) =>
@@ -211,7 +232,6 @@ export default function PostDetailPage() {
 
             console.error(err);
 
-            // rollback
             setIsLiked((prev) => !prev);
 
             setLikesCount((prev) =>
@@ -267,10 +287,10 @@ export default function PostDetailPage() {
             });
 
         } catch (err: any) {
-            console.log(err.response.data.message)
+
             const message =
-                err.response.data.message ||
-                "Error al crear el post";
+                err.response?.data?.message ||
+                "Error al crear comentario";
 
             Swal.fire({
                 icon: "error",
@@ -280,6 +300,60 @@ export default function PostDetailPage() {
         } finally {
 
             setLoadingComment(false);
+        }
+    };
+
+    // =========================
+    // CREATE REPLY
+    // =========================
+    const handleReply = async (
+        parentId: number
+    ) => {
+
+        if (!replyText.trim() || !post)
+            return;
+
+        try {
+
+            const newReply =
+                await createComment({
+                    postId: post.id,
+                    content: replyText,
+                    parentId,
+                });
+
+            setPost((prev) => {
+
+                if (!prev) return prev;
+
+                return {
+                    ...prev,
+
+                    comments:
+                        prev.comments?.map((c) => {
+
+                            if (c.id !== parentId)
+                                return c;
+
+                            return {
+                                ...c,
+
+                                replies: [
+                                    ...(c.replies || []),
+                                    newReply,
+                                ],
+                            };
+                        }),
+                };
+            });
+
+            setReplyText("");
+
+            setReplyingTo(null);
+
+        } catch (err) {
+
+            console.error(err);
         }
     };
 
@@ -311,6 +385,7 @@ export default function PostDetailPage() {
                 prev
                     ? {
                         ...prev,
+
                         comments:
                             prev.comments?.filter(
                                 (c) =>
@@ -356,6 +431,7 @@ export default function PostDetailPage() {
                 prev
                     ? {
                         ...prev,
+
                         comments:
                             prev.comments?.map(
                                 (c) =>
@@ -418,7 +494,6 @@ export default function PostDetailPage() {
     return (
         <>
 
-            {/* BACK */}
             <Link
                 href="/"
                 className="
@@ -444,19 +519,14 @@ export default function PostDetailPage() {
                 {/* POST */}
                 <div className="border border-white/10 rounded-2xl p-6 bg-white/5">
 
-                    {/* TITLE */}
                     <h1 className="text-3xl font-bold">
                         {post.title}
                     </h1>
 
-                    {/* USER */}
                     <p className="mt-2 text-zinc-400">
                         by {post.user?.name}
                     </p>
 
-
-
-                    {/* CONTENT */}
                     <p className="mt-6 text-zinc-200 leading-relaxed">
                         {post.content}
                     </p>
@@ -477,8 +547,6 @@ export default function PostDetailPage() {
                                             bg-white/10
                                             text-xs
                                             text-zinc-300
-                                            hover:bg-white/20
-                                            transition
                                         "
                                     >
                                         #{tag.name}
@@ -512,8 +580,6 @@ export default function PostDetailPage() {
 
                         <div className="flex gap-3 mt-4">
 
-                            {/* EDIT */}
-
                             <Link
                                 href={`/posts/${post.id}/edit`}
                                 className="
@@ -524,7 +590,7 @@ export default function PostDetailPage() {
                             >
                                 <Pencil size={18} />
                             </Link>
-                            {/* DELETE */}
+
                             <button
                                 onClick={handleDeletePost}
                                 className="
@@ -535,7 +601,7 @@ export default function PostDetailPage() {
                             >
                                 <Trash2 size={18} />
                             </button>
-                            {/* DATE */}
+
                             <div className="ml-auto text-xs text-zinc-500">
 
                                 {new Date(post.created_at).toLocaleDateString()}
@@ -546,7 +612,6 @@ export default function PostDetailPage() {
                     )}
 
                 </div>
-
 
                 {/* COMMENTS */}
                 <div className="mt-10">
@@ -561,9 +626,7 @@ export default function PostDetailPage() {
                         <input
                             value={comment}
                             onChange={(e) =>
-                                setComment(
-                                    e.target.value
-                                )
+                                setComment(e.target.value)
                             }
                             placeholder="Escribí un comentario..."
                             className="
@@ -591,7 +654,7 @@ export default function PostDetailPage() {
                     </div>
 
                     {/* COMMENTS LIST */}
-                    <div className="space-y-3">
+                    <div className="space-y-4">
 
                         {post.comments?.length ? (
 
@@ -600,16 +663,15 @@ export default function PostDetailPage() {
                                 <div
                                     key={c.id}
                                     className="
-                                        p-3
-                                        rounded-xl
+                                        p-4
+                                        rounded-2xl
                                         bg-white/5
                                         border border-white/10
                                     "
                                 >
 
                                     <p className="text-sm text-zinc-400">
-                                        {c.user?.name ??
-                                            "Usuario"}
+                                        {c.user?.name ?? "Usuario"}
                                     </p>
 
                                     {editingId === c.id ? (
@@ -633,14 +695,10 @@ export default function PostDetailPage() {
 
                                             <button
                                                 onClick={() =>
-                                                    handleUpdate(
-                                                        c.id
-                                                    )
+                                                    handleUpdate(c.id)
                                                 }
                                                 className="
                                                     text-green-400
-                                                    hover:text-green-300
-                                                    transition
                                                 "
                                             >
                                                 <Check size={18} />
@@ -655,43 +713,122 @@ export default function PostDetailPage() {
                                         </p>
                                     )}
 
-                                    {user?.id ===
-                                        c.user?.id &&
-                                        editingId !==
-                                        c.id && (
+                                    {/* ACTIONS */}
+                                    <div className="flex gap-4 mt-3">
 
-                                            <div className="flex gap-3 mt-3">
+                                        <button
+                                            onClick={() =>
+                                                setReplyingTo(
+                                                    replyingTo === c.id
+                                                        ? null
+                                                        : c.id
+                                                )
+                                            }
+                                            className="
+                                                text-sm
+                                                text-zinc-400
+                                                hover:text-white
+                                            "
+                                        >
+                                            Responder
+                                        </button>
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleEdit(
-                                                            c
-                                                        )
-                                                    }
-                                                    className="
-                                                        text-blue-400
-                                                        hover:text-blue-300
-                                                        transition
-                                                    "
-                                                >
-                                                    <Pencil size={18} />
-                                                </button>
+                                        {user?.id === c.user?.id &&
+                                            editingId !== c.id && (
 
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(
-                                                            c.id
-                                                        )
-                                                    }
-                                                    className="
-                                                        text-red-400
-                                                        hover:text-red-300
-                                                        transition
-                                                    "
-                                                >
-                                                    <Trash2 size={18} />
-                                                </button>
+                                                <>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleEdit(c)
+                                                        }
+                                                        className="
+                                                            text-blue-400
+                                                        "
+                                                    >
+                                                        <Pencil size={18} />
+                                                    </button>
 
+                                                    <button
+                                                        onClick={() =>
+                                                            handleDelete(c.id)
+                                                        }
+                                                        className="
+                                                            text-red-400
+                                                        "
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                </>
+                                            )}
+
+                                    </div>
+
+                                    {/* REPLY INPUT */}
+                                    {replyingTo === c.id && (
+
+                                        <div className="mt-4 flex gap-2">
+
+                                            <input
+                                                value={replyText}
+                                                onChange={(e) =>
+                                                    setReplyText(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                placeholder="Responder..."
+                                                className="
+                                                    flex-1
+                                                    bg-white/10
+                                                    border border-white/10
+                                                    rounded-xl
+                                                    px-3 py-2
+                                                "
+                                            />
+
+                                            <button
+                                                onClick={() =>
+                                                    handleReply(c.id)
+                                                }
+                                                className="
+                                                    px-4 py-2
+                                                    rounded-xl
+                                                    bg-white
+                                                    text-black
+                                                "
+                                            >
+                                                Enviar
+                                            </button>
+
+                                        </div>
+                                    )}
+
+                                    {/* REPLIES */}
+                                    {c.replies &&
+                                        c.replies.length > 0 && (
+
+                                            <div className="mt-4 ml-6 space-y-3">
+
+                                                {c.replies.map((reply) => (
+
+                                                    <div
+                                                        key={reply.id}
+                                                        className="
+                                                            border-l
+                                                            border-white/10
+                                                            pl-4
+                                                        "
+                                                    >
+
+                                                        <p className="text-xs text-zinc-500">
+                                                            {reply.user?.name}
+                                                        </p>
+
+                                                        <p className="text-sm text-zinc-200 mt-1">
+                                                            {reply.content}
+                                                        </p>
+
+                                                    </div>
+                                                ))}
 
                                             </div>
                                         )}

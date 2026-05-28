@@ -22,9 +22,9 @@ class CommentController extends Controller
     {
         $validated = $request->validate([
             'content' => 'required|string',
-            'post_id' => 'required|exists:posts,id'
+            'post_id' => 'required|exists:posts,id',
+            'parent_id' => 'nullable|exists:comments,id',
         ]);
-
         /**
          * =========================
          * RATE LIMITING
@@ -68,7 +68,10 @@ class CommentController extends Controller
         $this->authorize('update', $comment);
 
         $validated = $request->validate([
-            'content' => 'required|string'
+            'content' => 'required|string',
+            'post_id' => $validated['post_id'],
+            'parent_id' => $validated['parent_id'] ?? null,
+            'user_id' => auth()->id(),
         ]);
 
         $comment->update($validated);

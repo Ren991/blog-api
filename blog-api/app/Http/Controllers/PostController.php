@@ -181,6 +181,7 @@ class PostController extends Controller
         $post = Post::with([
                 'user',
                 'comments.user',
+                'comments.replies.user',
                 'tags',
                 'likes'
             ])
