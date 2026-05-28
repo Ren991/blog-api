@@ -12,7 +12,8 @@ class Comment extends Model
     protected $fillable = [
         'content',
         'user_id',
-        'post_id'
+        'post_id',
+        'parent_id',
     ];
 
     public function user(): BelongsTo
@@ -32,6 +33,7 @@ class Comment extends Model
 
     public function replies()
     {
-        return $this->hasMany(Comment::class, 'parent_id');
+        return $this->hasMany(Comment::class, 'parent_id')
+            ->with('user');
     }
 }

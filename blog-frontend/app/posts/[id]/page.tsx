@@ -514,7 +514,7 @@ export default function PostDetailPage() {
                 Volver
             </Link>
 
-            <div className="max-w-2xl mx-auto px-6 py-10 text-white">
+            <div className="max-w-6xl mx-auto px-6 py-10 text-white">
 
                 {/* POST */}
                 <div className="border border-white/10 rounded-2xl p-6 bg-white/5">
@@ -614,7 +614,7 @@ export default function PostDetailPage() {
                 </div>
 
                 {/* COMMENTS */}
-                <div className="mt-10">
+                <div className="mt-12">
 
                     <h2 className="text-xl font-semibold mb-4">
                         Comentarios

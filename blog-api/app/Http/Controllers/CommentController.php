@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use App\Http\Resources\CommentResource;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class CommentController extends Controller
@@ -14,7 +12,14 @@ class CommentController extends Controller
     public function index()
     {
         return CommentResource::collection(
-            Comment::with(['user', 'post'])->latest()->get()
+            Comment::with([
+                'user',
+                'post',
+                'replies.user'
+            ])
+            ->whereNull('parent_id')
+            ->latest()
+            ->get()
         );
     }
 
@@ -25,40 +30,58 @@ class CommentController extends Controller
             'post_id' => 'required|exists:posts,id',
             'parent_id' => 'nullable|exists:comments,id',
         ]);
+
         /**
          * =========================
          * RATE LIMITING
          * =========================
          */
-
         $userId = auth()->id();
 
         $key = "comments:{$userId}:" . now()->format('Y-m-d-H');
 
         $count = Cache::get($key, 0);
 
-        if ($count >= 1) {
+        if ($count >= 10) {
+
             return response()->json([
-                'message' => 'Límite de 20 comentarios por hora alcanzado'
+                'message' => 'Límite de 10 comentarios por hora alcanzado'
             ], 429);
         }
 
-        Cache::put($key, $count + 1, now()->addHour());
+        Cache::put(
+            $key,
+            $count + 1,
+            now()->addHour()
+        );
 
+        /**
+         * =========================
+         * CREATE COMMENT
+         * =========================
+         */
         $comment = Comment::create([
             'content' => $validated['content'],
             'post_id' => $validated['post_id'],
-            'user_id' => auth()->id()
+            'parent_id' => $validated['parent_id'] ?? null,
+            'user_id' => auth()->id(),
         ]);
 
-        $comment->load(['user', 'post']);
+        $comment->load([
+            'user',
+            'replies.user'
+        ]);
 
         return new CommentResource($comment);
     }
 
     public function show(string $id)
     {
-        return Comment::with(['user', 'post'])->findOrFail($id);
+        return Comment::with([
+            'user',
+            'post',
+            'replies.user'
+        ])->findOrFail($id);
     }
 
     public function update(Request $request, string $id)
@@ -69,14 +92,15 @@ class CommentController extends Controller
 
         $validated = $request->validate([
             'content' => 'required|string',
-            'post_id' => $validated['post_id'],
-            'parent_id' => $validated['parent_id'] ?? null,
-            'user_id' => auth()->id(),
         ]);
 
-        $comment->update($validated);
+        $comment->update([
+            'content' => $validated['content']
+        ]);
 
-        return response()->json($comment);
+        return new CommentResource(
+            $comment->load('user')
+        );
     }
 
     public function destroy(string $id)

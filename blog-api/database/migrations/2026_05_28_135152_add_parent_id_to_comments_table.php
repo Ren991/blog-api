@@ -14,9 +14,10 @@ return new class extends Migration
     Schema::table('comments', function (Blueprint $table) {
 
         $table->foreignId('parent_id')
-            ->nullable()
-            ->constrained('comments')
-            ->nullOnDelete();
+        ->nullable()
+        ->after('post_id')
+        ->constrained('comments')
+        ->nullOnDelete();
     });
 }
 

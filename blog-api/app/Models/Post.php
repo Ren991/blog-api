@@ -23,9 +23,11 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function comments(): HasMany
+    public function comments()
     {
-        return $this->hasMany(Comment::class);
+        return $this->hasMany(Comment::class)
+            ->whereNull('parent_id')
+            ->with('replies.user');
     }
 
     public function tags(): BelongsToMany
