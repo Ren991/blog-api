@@ -99,7 +99,6 @@ export default function CreatePostPage() {
 
         } catch (err: any) {
 
-            console.log(err.response.data.message)
             const message =
                 err.response.data.message ||
                 "Error al crear el post";

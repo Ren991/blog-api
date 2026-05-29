@@ -51,7 +51,6 @@ export default function PostCard({
     post,
     onTagClick,
 }: Props) {
-    console.log(post)
     const [liked, setLiked] =
         useState(post.is_liked);
 
@@ -155,16 +154,7 @@ export default function PostCard({
             </Link>
 
             {/* CONTENT */}
-            {/*  <p
-                className="
-                    mt-2
-                    text-sm
-                    text-zinc-300
-                    line-clamp-2
-                "
-            >
-                {post.content}
-            </p> */}
+            
             <div   className="text-zinc-300 mt-2 line-clamp-3 cursor-pointer"
 
                 dangerouslySetInnerHTML={{

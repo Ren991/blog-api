@@ -35,7 +35,6 @@ export default function RegisterPage() {
                 password,
             });
 
-            console.log(response);
 
             toast.success("Cuenta creada 🚀");
 
