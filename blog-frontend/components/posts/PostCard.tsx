@@ -229,6 +229,8 @@ export default function PostCard({
 
                 </div>
 
+                
+
 
                 {/* DATE */}
                 <div className="ml-auto text-xs text-zinc-500">
@@ -236,6 +238,12 @@ export default function PostCard({
                     {new Date(post.created_at).toLocaleDateString()}
 
                 </div>
+                        <Link href={`/posts/${post.id}`}>
+                <h3 className="ml-auto text-s text-zinc-500">
+                        ver mas
+
+                </h3>
+                </Link>
 
             </div>
 
