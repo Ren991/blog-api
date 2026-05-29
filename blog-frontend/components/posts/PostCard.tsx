@@ -165,7 +165,8 @@ export default function PostCard({
             >
                 {post.content}
             </p> */}
-            <div
+            <div   className="text-zinc-300 mt-2 line-clamp-3 cursor-pointer"
+
                 dangerouslySetInnerHTML={{
                     __html: post.content
                 }}
