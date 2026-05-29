@@ -4,9 +4,9 @@ import Link from "next/link";
 
 import { useState } from "react";
 
-import { Heart , View } from "lucide-react";
+import { Heart, View } from "lucide-react";
 
-import {  likePost,    unlikePost,} from "@/services/like.service";
+import { likePost, unlikePost, } from "@/services/like.service";
 
 type Tag = {
     id: number;
@@ -151,8 +151,8 @@ export default function PostCard({
             </Link>
 
             {/* CONTENT */}
-            
-            <div   className="text-zinc-300 mt-2 line-clamp-3 cursor-pointer"
+
+            <div className="text-zinc-300 mt-2 line-clamp-3 cursor-pointer"
 
                 dangerouslySetInnerHTML={{
                     __html: post.content
@@ -226,7 +226,7 @@ export default function PostCard({
 
                 </div>
 
-                
+
 
 
                 {/* DATE */}
@@ -236,14 +236,10 @@ export default function PostCard({
 
                 </div>
                 <Link href={`/posts/${post.id}`}>
-                    {/* <h3 className="ml-auto text-s text-zinc-500">
-                            ver mas
-
-                    </h3> */}
+                    
                     <View
-                            size={15}
-                            
-                        />
+                        size={15}
+                    />
 
                 </Link>
 

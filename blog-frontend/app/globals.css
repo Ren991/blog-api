@@ -273,3 +273,11 @@
 .editor-content u {
     text-decoration: underline;
 }
+
+.ProseMirror img {
+    border-radius: 16px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    max-width: 100%;
+    height: auto;
+}

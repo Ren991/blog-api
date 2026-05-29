@@ -13,9 +13,11 @@ import {
     TableIcon,
     Plus,
     Minus,
-    Smile
+    Smile,
+    ImageIcon
 } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
+import { uploadImage } from "@/services/upload.service";
 
 
 
@@ -70,15 +72,15 @@ export default function Toolbar({ editor }: Props) {
         };
     }, []);
     useEffect(() => {
-  const handleClickOutside = (e: MouseEvent) => {
-    if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
-      setShowEmoji(false);
-    }
-  };
+        const handleClickOutside = (e: MouseEvent) => {
+            if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+                setShowEmoji(false);
+            }
+        };
 
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
         <div
@@ -386,24 +388,59 @@ export default function Toolbar({ editor }: Props) {
                             </div>
                         </div>
                     )} </div>
-                
+
             </div>
             <button
-                    type="button"
-                    onClick={() => setShowEmoji((v) => !v)}
-                    className={buttonClass}
-                >
-                    <Smile size={18} />
-                </button>
-                {showEmoji && (
-                    <div ref={pickerRef} className="absolute z-50 mt-2">
-                        <EmojiPicker
-                            onEmojiClick={(emojiData) => {
-                                editor.chain().focus().insertContent(emojiData.emoji).run();
-                            }}
-                        />
-                    </div>
-                )}
+                type="button"
+                onClick={() => setShowEmoji((v) => !v)}
+                className={buttonClass}
+            >
+                <Smile size={18} />
+            </button>
+            {showEmoji && (
+                <div ref={pickerRef} className="absolute z-50 mt-2">
+                    <EmojiPicker
+                        onEmojiClick={(emojiData) => {
+                            editor.chain().focus().insertContent(emojiData.emoji).run();
+                        }}
+                    />
+                </div>
+            )}
+            <button
+                type="button"
+                className={buttonClass}
+                onClick={async () => {
+
+                    const input =
+                        document.createElement("input");
+
+                    input.type = "file";
+
+                    input.accept = "image/*";
+
+                    input.click();
+
+                    input.onchange = async () => {
+
+                        if (!input.files?.length)
+                            return;
+
+                        const file =
+                            input.files[0];
+
+                        const url =
+                            await uploadImage(file);
+
+                        editor
+                            .chain()
+                            .focus()
+                            .setImage({ src: url })
+                            .run();
+                    };
+                }}
+            >
+                <ImageIcon size={18} />
+            </button>
         </div>
     );
 }

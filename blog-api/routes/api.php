@@ -5,6 +5,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\UploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Posts
     Route::apiResource('posts', PostController::class);
     Route::get('/posts/{id}', [PostController::class, 'show']);
+    
+    Route::post('/upload', [UploadController::class, 'store']);
+
     // Comments
     Route::apiResource('comments', CommentController::class);
 
