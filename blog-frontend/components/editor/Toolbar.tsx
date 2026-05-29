@@ -1,6 +1,6 @@
 "use client";
 
-import { useState , useRef,useEffect} from "react";
+import { useState, useRef, useEffect } from "react";
 
 import {
     Bold,
@@ -13,7 +13,11 @@ import {
     TableIcon,
     Plus,
     Minus,
+    Smile
 } from "lucide-react";
+import EmojiPicker from "emoji-picker-react";
+
+
 
 type Props = {
     editor: any;
@@ -28,8 +32,11 @@ export default function Toolbar({ editor }: Props) {
 
     const [rows, setRows] = useState(3);
     const [cols, setCols] = useState(3);
+    const [showEmoji, setShowEmoji] = useState(false);
 
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const pickerRef = useRef<HTMLDivElement>(null);
+
 
     const buttonClass = `
         p-2
@@ -44,23 +51,33 @@ export default function Toolbar({ editor }: Props) {
     `;
 
     useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-        if (
-            menuRef.current &&
-            !menuRef.current.contains(e.target as Node)
-        ) {
-            setShowTableMenu(false);
-        }
-    };
+        const handleClickOutside = (e: MouseEvent) => {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(e.target as Node)
+            ) {
+                setShowTableMenu(false);
+            }
+        };
 
-    document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
 
-    return () => {
-        document.removeEventListener(
-            "mousedown",
-            handleClickOutside
-        );
-    };
+        return () => {
+            document.removeEventListener(
+                "mousedown",
+                handleClickOutside
+            );
+        };
+    }, []);
+    useEffect(() => {
+  const handleClickOutside = (e: MouseEvent) => {
+    if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+      setShowEmoji(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
 }, []);
 
     return (
@@ -86,8 +103,8 @@ export default function Toolbar({ editor }: Props) {
                         .run()
                 }
                 className={`${buttonClass} ${editor.isActive("heading", { level: 1 })
-                        ? activeClass
-                        : ""
+                    ? activeClass
+                    : ""
                     }`}
             >
                 <Heading1 size={18} />
@@ -104,8 +121,8 @@ export default function Toolbar({ editor }: Props) {
                         .run()
                 }
                 className={`${buttonClass} ${editor.isActive("heading", { level: 2 })
-                        ? activeClass
-                        : ""
+                    ? activeClass
+                    : ""
                     }`}
             >
                 <Heading2 size={18} />
@@ -130,8 +147,8 @@ export default function Toolbar({ editor }: Props) {
                     editor.chain().focus().toggleItalic().run()
                 }
                 className={`${buttonClass} ${editor.isActive("italic")
-                        ? activeClass
-                        : ""
+                    ? activeClass
+                    : ""
                     }`}
             >
                 <Italic size={18} />
@@ -148,8 +165,8 @@ export default function Toolbar({ editor }: Props) {
                         .run()
                 }
                 className={`${buttonClass} ${editor.isActive("underline")
-                        ? activeClass
-                        : ""
+                    ? activeClass
+                    : ""
                     }`}
             >
                 <UnderlineIcon size={18} />
@@ -166,8 +183,8 @@ export default function Toolbar({ editor }: Props) {
                         .run()
                 }
                 className={`${buttonClass} ${editor.isActive("bulletList")
-                        ? activeClass
-                        : ""
+                    ? activeClass
+                    : ""
                     }`}
             >
                 <List size={18} />
@@ -184,8 +201,8 @@ export default function Toolbar({ editor }: Props) {
                         .run()
                 }
                 className={`${buttonClass} ${editor.isActive("orderedList")
-                        ? activeClass
-                        : ""
+                    ? activeClass
+                    : ""
                     }`}
             >
                 <ListOrdered size={18} />
@@ -205,9 +222,9 @@ export default function Toolbar({ editor }: Props) {
                     <TableIcon size={18} />
                 </button>
                 <div ref={menuRef}>
-                {showTableMenu && (
-                    <div
-                        className="
+                    {showTableMenu && (
+                        <div
+                            className="
                             absolute
                             top-12
                             left-0
@@ -219,26 +236,26 @@ export default function Toolbar({ editor }: Props) {
                             p-4
                             shadow-xl
                         "
-                    >
-                        <p className="text-sm text-zinc-400 mb-3">
-                            Insertar tabla
-                        </p>
+                        >
+                            <p className="text-sm text-zinc-400 mb-3">
+                                Insertar tabla
+                            </p>
 
-                        {/* ROWS */}
-                        <label className="text-xs text-zinc-500">
-                            Filas
-                        </label>
-                        <input
-                            type="number"
-                            min={1}
-                            max={20}
-                            value={rows}
-                            onChange={(e) =>
-                                setRows(
-                                    Number(e.target.value)
-                                )
-                            }
-                            className="
+                            {/* ROWS */}
+                            <label className="text-xs text-zinc-500">
+                                Filas
+                            </label>
+                            <input
+                                type="number"
+                                min={1}
+                                max={20}
+                                value={rows}
+                                onChange={(e) =>
+                                    setRows(
+                                        Number(e.target.value)
+                                    )
+                                }
+                                className="
                                 w-full
                                 mt-1 mb-3
                                 px-3 py-2
@@ -246,23 +263,23 @@ export default function Toolbar({ editor }: Props) {
                                 bg-white/5
                                 border border-white/10
                             "
-                        />
+                            />
 
-                        {/* COLS */}
-                        <label className="text-xs text-zinc-500">
-                            Columnas
-                        </label>
-                        <input
-                            type="number"
-                            min={1}
-                            max={10}
-                            value={cols}
-                            onChange={(e) =>
-                                setCols(
-                                    Number(e.target.value)
-                                )
-                            }
-                            className="
+                            {/* COLS */}
+                            <label className="text-xs text-zinc-500">
+                                Columnas
+                            </label>
+                            <input
+                                type="number"
+                                min={1}
+                                max={10}
+                                value={cols}
+                                onChange={(e) =>
+                                    setCols(
+                                        Number(e.target.value)
+                                    )
+                                }
+                                className="
                                 w-full
                                 mt-1 mb-4
                                 px-3 py-2
@@ -270,26 +287,26 @@ export default function Toolbar({ editor }: Props) {
                                 bg-white/5
                                 border border-white/10
                             "
-                        />
+                            />
 
-                        <button
-                            type="button"
-                            onClick={() => {
-                                const safeCols = Math.min(cols, MAX_COLS);
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const safeCols = Math.min(cols, MAX_COLS);
 
-                                editor
-                                    .chain()
-                                    .focus()
-                                    .insertTable({
-                                        rows,
-                                        cols: safeCols,
-                                        withHeaderRow: true,
-                                    })
-                                    .run();
+                                    editor
+                                        .chain()
+                                        .focus()
+                                        .insertTable({
+                                            rows,
+                                            cols: safeCols,
+                                            withHeaderRow: true,
+                                        })
+                                        .run();
 
-                                setShowTableMenu(false);
-                            }}
-                            className="
+                                    setShowTableMenu(false);
+                                }}
+                                className="
                                 w-full
                                 bg-white
                                 text-black
@@ -297,79 +314,96 @@ export default function Toolbar({ editor }: Props) {
                                 rounded-xl
                                 font-medium
                             "
-                        >
-                            Crear tabla
-                        </button>
-
-                        <div className="flex gap-2 mt-3">
-                            <button
-                                onClick={() =>
-                                    editor
-                                        .chain()
-                                        .focus()
-                                        .addRowAfter()
-                                        .run()
-                                }
-                                className="flex-1 text-xs bg-white/10 p-2 rounded"
                             >
-                                +Fila
+                                Crear tabla
                             </button>
 
-                            <button
-                                onClick={() => {
-                                    const table = editor.getAttributes("table");
+                            <div className="flex gap-2 mt-3">
+                                <button
+                                    onClick={() =>
+                                        editor
+                                            .chain()
+                                            .focus()
+                                            .addRowAfter()
+                                            .run()
+                                    }
+                                    className="flex-1 text-xs bg-white/10 p-2 rounded"
+                                >
+                                    +Fila
+                                </button>
 
-                                    const currentCols =
-                                        editor.state.doc
-                                            .resolve(editor.state.selection.from)
-                                            .node(-1)
-                                            ?.childCount || 0;
+                                <button
+                                    onClick={() => {
+                                        const table = editor.getAttributes("table");
 
-                                    if (currentCols >= MAX_COLS) return;
+                                        const currentCols =
+                                            editor.state.doc
+                                                .resolve(editor.state.selection.from)
+                                                .node(-1)
+                                                ?.childCount || 0;
 
-                                    editor
-                                        .chain()
-                                        .focus()
-                                        .addColumnAfter()
-                                        .run();
-                                }}
-                             className="flex-1 text-xs bg-white/10 p-2 rounded"
+                                        if (currentCols >= MAX_COLS) return;
 
-                            >
-                                +Col
-                            </button>
+                                        editor
+                                            .chain()
+                                            .focus()
+                                            .addColumnAfter()
+                                            .run();
+                                    }}
+                                    className="flex-1 text-xs bg-white/10 p-2 rounded"
+
+                                >
+                                    +Col
+                                </button>
+                            </div>
+
+                            <div className="flex gap-2 mt-2">
+                                <button
+                                    onClick={() =>
+                                        editor
+                                            .chain()
+                                            .focus()
+                                            .deleteRow()
+                                            .run()
+                                    }
+                                    className="flex-1 text-xs bg-red-500/20 p-2 rounded"
+                                >
+                                    -Fila
+                                </button>
+
+                                <button
+                                    onClick={() =>
+                                        editor
+                                            .chain()
+                                            .focus()
+                                            .deleteColumn()
+                                            .run()
+                                    }
+                                    className="flex-1 text-xs bg-red-500/20 p-2 rounded"
+                                >
+                                    -Col
+                                </button>
+                            </div>
                         </div>
-
-                        <div className="flex gap-2 mt-2">
-                            <button
-                                onClick={() =>
-                                    editor
-                                        .chain()
-                                        .focus()
-                                        .deleteRow()
-                                        .run()
-                                }
-                                className="flex-1 text-xs bg-red-500/20 p-2 rounded"
-                            >
-                                -Fila
-                            </button>
-
-                            <button
-                                onClick={() =>
-                                    editor
-                                        .chain()
-                                        .focus()
-                                        .deleteColumn()
-                                        .run()
-                                }
-                                className="flex-1 text-xs bg-red-500/20 p-2 rounded"
-                            >
-                                -Col
-                            </button>
-                        </div>
-                    </div>
-                )} </div>
+                    )} </div>
+                
             </div>
+            <button
+                    type="button"
+                    onClick={() => setShowEmoji((v) => !v)}
+                    className={buttonClass}
+                >
+                    <Smile size={18} />
+                </button>
+                {showEmoji && (
+                    <div ref={pickerRef} className="absolute z-50 mt-2">
+                        <EmojiPicker
+                            onEmojiClick={(emojiData) => {
+                                editor.chain().focus().insertContent(emojiData.emoji).run();
+                            }}
+                        />
+                    </div>
+                )}
         </div>
     );
 }
