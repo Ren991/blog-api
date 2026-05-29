@@ -133,7 +133,7 @@ export default function PostCard({
             {/* USER */}
             <div className="text-sm text-zinc-400">
 
-               Creado por : {post.user.name}
+                Creado por : {post.user.name}
 
             </div>
 
@@ -155,7 +155,7 @@ export default function PostCard({
             </Link>
 
             {/* CONTENT */}
-            <p
+            {/*  <p
                 className="
                     mt-2
                     text-sm
@@ -164,7 +164,12 @@ export default function PostCard({
                 "
             >
                 {post.content}
-            </p>
+            </p> */}
+            <div
+                dangerouslySetInnerHTML={{
+                    __html: post.content
+                }}
+            />
 
             {/* TAGS */}
             {post.tags &&

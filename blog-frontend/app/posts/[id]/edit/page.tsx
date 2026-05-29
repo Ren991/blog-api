@@ -23,6 +23,7 @@ import {
 } from "@/services/post.service";
 
 import SlideToPost from "@/components/ui/SlideToPost";
+import PostEditor from "@/components/editor/PostEditor";
 
 type Tag = {
     id: number;
@@ -222,11 +223,16 @@ export default function EditPostPage() {
                 />
 
                 {/* CONTENT */}
-                <textarea
+                {/* <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     rows={8}
                     className="w-full mb-4 rounded-xl bg-white/5 border border-white/10 px-4 py-3"
+                /> */}
+
+                <PostEditor
+                    content={content}
+                    onChange={setContent}
                 />
 
                 {/* TAG INPUT */}

@@ -36,6 +36,8 @@ import {
 import {
     deletePost,
 } from "@/services/post.service";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type Comment = {
     id: number;
@@ -362,47 +364,47 @@ export default function PostDetailPage() {
     // DELETE COMMENT
     // =========================
     const handleDelete = async (
-    commentId: number
-) => {
+        commentId: number
+    ) => {
 
-    const confirm = await Swal.fire({
-        title: "¿Eliminar comentario?",
-        icon: "warning",
-        showCancelButton: true,
-    });
-
-    if (!confirm.isConfirmed) return;
-
-    try {
-
-        await deleteComment(commentId);
-
-        setPost((prev) => {
-
-            if (!prev) return prev;
-
-            return {
-
-                ...prev,
-
-                comments: prev.comments?.filter(
-                    (c) => c.id !== commentId
-                ).map((c) => ({
-
-                    ...c,
-
-                    replies: c.replies?.filter(
-                        (r) => r.id !== commentId
-                    ) || [],
-                })),
-            };
+        const confirm = await Swal.fire({
+            title: "¿Eliminar comentario?",
+            icon: "warning",
+            showCancelButton: true,
         });
 
-    } catch (err) {
+        if (!confirm.isConfirmed) return;
 
-        console.error(err);
-    }
-};
+        try {
+
+            await deleteComment(commentId);
+
+            setPost((prev) => {
+
+                if (!prev) return prev;
+
+                return {
+
+                    ...prev,
+
+                    comments: prev.comments?.filter(
+                        (c) => c.id !== commentId
+                    ).map((c) => ({
+
+                        ...c,
+
+                        replies: c.replies?.filter(
+                            (r) => r.id !== commentId
+                        ) || [],
+                    })),
+                };
+            });
+
+        } catch (err) {
+
+            console.error(err);
+        }
+    };
 
     // =========================
     // EDIT COMMENT
@@ -523,10 +525,21 @@ export default function PostDetailPage() {
                         by {post.user?.name}
                     </p>
 
-                    <p className="mt-6 text-zinc-200 leading-relaxed">
+                   {/*  <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                    >
                         {post.content}
-                    </p>
-
+                    </ReactMarkdown> */}
+                    <div
+    className="
+        prose
+        prose-invert
+        max-w-none
+    "
+    dangerouslySetInnerHTML={{
+        __html: post.content,
+    }}
+/>
                     {/* TAGS */}
                     {post.tags &&
                         post.tags.length > 0 && (

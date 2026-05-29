@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @custom-variant dark (&:is(.dark *));
 
@@ -132,4 +135,141 @@
     @apply font-sans; /* Usa el stack estilizado definido arriba */
     scroll-behavior: smooth;
   }
+}
+
+/* =========================
+   TIPTAP
+========================= */
+
+.ProseMirror {
+    outline: none;
+}
+
+/* HEADINGS */
+
+.ProseMirror h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.ProseMirror h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* LISTS */
+
+.ProseMirror ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.ProseMirror ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.ProseMirror li {
+    margin: 0.25rem 0;
+}
+
+/* TABLES */
+
+.ProseMirror table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.ProseMirror th {
+    background: rgba(255,255,255,0.08);
+    font-weight: 600;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.75rem;
+    text-align: left;
+}
+
+/* BLOCKQUOTE */
+
+.ProseMirror blockquote {
+    border-left: 3px solid rgba(255,255,255,0.2);
+    padding-left: 1rem;
+    color: #a1a1aa;
+    margin: 1rem 0;
+}
+
+.editor-content h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.editor-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.editor-content ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.editor-content ol {
+    list-style-type: decimal;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+}
+
+.editor-content li {
+    margin: 0.25rem 0;
+}
+
+.editor-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.editor-content th,
+.editor-content td {
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.75rem;
+}
+
+.editor-content th {
+    background: rgba(255,255,255,0.08);
+    font-weight: 600;
+}
+
+.editor-content p {
+    margin: 0.75rem 0;
+}
+
+.editor-content strong {
+    font-weight: 700;
+}
+
+.editor-content em {
+    font-style: italic;
+}
+
+.editor-content u {
+    text-decoration: underline;
 }

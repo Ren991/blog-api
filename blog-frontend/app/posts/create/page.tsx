@@ -10,6 +10,7 @@ import { ArrowLeft, X } from "lucide-react";
 import SlideToPost from "@/components/ui/SlideToPost";
 import { createPost } from "@/services/post.service";
 import Link from "next/link";
+import PostEditor from "@/components/editor/PostEditor";
 
 export default function CreatePostPage() {
     const router = useRouter();
@@ -96,17 +97,17 @@ export default function CreatePostPage() {
             return true
 
 
-        } catch (err:any) {
+        } catch (err: any) {
 
             console.log(err.response.data.message)
             const message =
-        err.response.data.message ||
-        "Error al crear el post";
+                err.response.data.message ||
+                "Error al crear el post";
 
-    Swal.fire({
-        icon: "error",
-        title: message,
-    });
+            Swal.fire({
+                icon: "error",
+                title: message,
+            });
             return false
 
         } finally {
@@ -173,20 +174,10 @@ export default function CreatePostPage() {
                         Contenido
                     </label>
 
-                    <textarea
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="¿Qué querés compartir?"
-                        rows={8}
-                        className="
-                            w-full
-                            rounded-xl
-                            bg-white/5
-                            border border-white/10
-                            px-4 py-3
-                            outline-none
-                            resize-none
-                        "
+
+                    <PostEditor
+                        content={content}
+                        onChange={setContent}
                     />
 
                     <div className="text-right text-xs text-zinc-500 mt-2">
@@ -256,26 +247,6 @@ export default function CreatePostPage() {
 
                 </div>
 
-                {/* BUTTON */}
-                {/*  <button
-                    onClick={handleCreatePost}
-                    disabled={loading}
-                    className="
-                        w-full
-                        rounded-xl
-                        bg-white
-                        text-black
-                        font-semibold
-                        py-3
-                        transition
-                        hover:opacity-90
-                        disabled:opacity-50
-                    "
-                >
-                    {loading
-                        ? "Publicando..."
-                        : "Publicar"}
-                </button> */}
                 <SlideToPost
                     onComplete={handleCreatePost}
                     loading={loading}
