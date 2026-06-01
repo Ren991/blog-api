@@ -9,3 +9,27 @@ export const getUserProfile = async (
 
     return response.data;
 };
+
+export const uploadAvatar = async (
+    file: File
+) => {
+    const formData = new FormData();
+
+    formData.append(
+        "avatar",
+        file
+    );
+
+    const res = await api.post(
+        "/user/avatar",
+        formData,
+        {
+            headers: {
+                "Content-Type":
+                    "multipart/form-data",
+            },
+        }
+    );
+
+    return res.data;
+};

@@ -68,6 +68,7 @@ type Post = {
     user: {
         id: number;
         name: string;
+        avatar?: string | null;
     };
 
     tags?: Tag[];
@@ -521,9 +522,65 @@ export default function PostDetailPage() {
                         {post.title}
                     </h1>
 
-                    <p className="mt-2 text-zinc-400">
-                        by {post.user?.name}
-                    </p>
+                    {/* USER INFO */}
+                    <div className="flex items-center gap-3 mt-4">
+                        {/* AVATAR */}
+                        <Link href={`/users/${post.user?.id}`}>
+                            <div
+                                className="
+                                    h-12
+                                    w-12
+                                    rounded-full
+                                    overflow-hidden
+                                    border border-white/10
+                                "
+                            >
+                                {post.user?.avatar ? (
+                                    <img
+                                        src={post.user.avatar}
+                                        alt={post.user.name}
+                                        className="
+                                            h-full
+                                            w-full
+                                            object-cover
+                                        "
+                                    />
+                                ) : (
+                                    <div
+                                        className="
+                                            h-full
+                                            w-full
+                                            bg-gradient-to-br
+                                            from-purple-500
+                                            to-blue-500
+                                            flex
+                                            items-center
+                                            justify-center
+                                            text-sm
+                                            font-bold
+                                            text-white
+                                        "
+                                    >
+                                        {post.user?.name
+                                            .charAt(0)
+                                            .toUpperCase()}
+                                    </div>
+                                )}
+                            </div>
+                        </Link>
+
+                        {/* NAME */}
+                        <Link
+                            href={`/users/${post.user?.id}`}
+                            className="
+                                text-zinc-400
+                                hover:text-white
+                                transition
+                            "
+                        >
+                            by {post.user?.name}
+                        </Link>
+                    </div>
 
             
                     <div

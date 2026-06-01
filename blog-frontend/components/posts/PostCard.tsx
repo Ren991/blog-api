@@ -24,8 +24,9 @@ type Post = {
 
 
     user: {
-        name: string;
         id: number;
+        name: string;
+        avatar?: string | null;
     };
 
     likes_count?: number;
@@ -128,19 +129,66 @@ export default function PostCard({
         >
 
             {/* USER */}
-            <div className="text-sm text-zinc-400">
+            <div className="flex items-center gap-3">
+                
+                {/* AVATAR */}
+                <Link href={`/users/${post.user.id}`}>
+                    <div
+                        className="
+                            h-10
+                            w-10
+                            rounded-full
+                            overflow-hidden
+                            flex-shrink-0
+                            border border-white/10
+                        "
+                    >
+                        {post.user.avatar ? (
+                            <img
+                                src={post.user.avatar}
+                                alt={post.user.name}
+                                className="
+                                    h-full
+                                    w-full
+                                    object-cover
+                                "
+                            />
+                        ) : (
+                            <div
+                                className="
+                                    h-full
+                                    w-full
+                                    bg-gradient-to-br
+                                    from-purple-500
+                                    to-blue-500
+                                    flex
+                                    items-center
+                                    justify-center
+                                    text-sm
+                                    font-bold
+                                    text-white
+                                "
+                            >
+                                {post.user.name
+                                    .charAt(0)
+                                    .toUpperCase()}
+                            </div>
+                        )}
+                    </div>
+                </Link>
 
-                {/* Creado por : {post.user.name} */}
-                <Link
-    href={`/users/${post.user.id}`}
-    className="
-        hover:text-white
-        transition
-    "
->
-    {post.user.name}
-</Link>
-
+                {/* NAME */}
+                <div className="text-sm text-zinc-400">
+                    <Link
+                        href={`/users/${post.user.id}`}
+                        className="
+                            hover:text-white
+                            transition
+                        "
+                    >
+                        {post.user.name}
+                    </Link>
+                </div>
             </div>
 
             {/* TITLE */}

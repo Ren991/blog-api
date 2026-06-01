@@ -101,19 +101,43 @@ export default function UserProfilePage() {
                     className="
                         h-24 w-24
                         rounded-full
-                        bg-gradient-to-br
-                        from-purple-500
-                        to-blue-500
+                        overflow-hidden
                         flex
                         items-center
                         justify-center
-                        text-3xl
-                        font-bold
+                        border border-white/10
                     "
                 >
-                    {profile.user.name
-                        .charAt(0)
-                        .toUpperCase()}
+                    {profile.user.avatar ? (
+                        <img
+                            src={profile.user.avatar}
+                            alt={profile.user.name}
+                            className="
+                                h-full
+                                w-full
+                                object-cover
+                            "
+                        />
+                    ) : (
+                        <div
+                            className="
+                                h-full
+                                w-full
+                                bg-gradient-to-br
+                                from-purple-500
+                                to-blue-500
+                                flex
+                                items-center
+                                justify-center
+                                text-3xl
+                                font-bold
+                            "
+                        >
+                            {profile.user.name
+                                .charAt(0)
+                                .toUpperCase()}
+                        </div>
+                    )}
                 </div>
 
                 <h1

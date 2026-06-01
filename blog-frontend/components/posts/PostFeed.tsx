@@ -11,7 +11,11 @@ type Post = {
   title: string;
   content: string;
   created_at: string;
-  user: { name: string };
+  user: { 
+    id: number;
+    name: string;
+    avatar?: string | null;
+  };
   likes_count?: number;
   is_liked: boolean;
   comments_count?: number;

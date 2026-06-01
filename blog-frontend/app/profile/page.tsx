@@ -2,6 +2,8 @@
 
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
+import {uploadAvatar} from "@/services/user.service";
 
 import {
     LogOut,
@@ -32,7 +34,9 @@ type Post = {
     created_at: string;
 
     user: {
+        id: number;
         name: string;
+        avatar?: string | null;
     };
 
     likes_count?: number;
@@ -50,6 +54,7 @@ export default function ProfilePage() {
         user,
         isAuthenticated,
         logout,
+        updateUser,
     } = useAuth();
 
     const router = useRouter();
@@ -110,6 +115,68 @@ export default function ProfilePage() {
     // =========================
     // UI
     // =========================
+    const handleChangeAvatar = async () => {
+
+    const result = await Swal.fire({
+        title: "¿Desea cambiar su avatar?",
+        text: "Seleccione una imagen",
+        icon: "question",
+
+        showCancelButton: true,
+
+        confirmButtonText: "Sí",
+
+        cancelButtonText: "No",
+    });
+
+    if (!result.isConfirmed) return;
+
+    const input =
+        document.createElement("input");
+
+    input.type = "file";
+
+    input.accept = "image/*";
+
+    input.onchange = async () => {
+
+        const file =
+            input.files?.[0];
+
+        if (!file) return;
+
+        try {
+
+            const response =
+                await uploadAvatar(file);
+
+            updateUser({
+                ...user!,
+                avatar: response.avatar,
+            });
+
+            Swal.fire({
+                icon: "success",
+                title: "Avatar actualizado",
+                timer: 1500,
+                showConfirmButton: false,
+            });
+
+        } catch (err) {
+
+            console.error(err);
+
+            Swal.fire({
+                icon: "error",
+                title:
+                    "Error actualizando avatar",
+            });
+        }
+    };
+
+    input.click();
+};
+
     return (
         <main className="min-h-screen bg-black text-white px-6 py-10">
 
@@ -147,25 +214,79 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-5">
 
                         {/* AVATAR */}
-                        <div
-                            className="
-                                h-24
-                                w-24
-                                rounded-full
-                                bg-gradient-to-br
-                                from-purple-500
-                                to-blue-500
-                                flex
-                                items-center
-                                justify-center
-                                text-3xl
-                                font-bold
-                            "
-                        >
-                            {user.name
-                                .charAt(0)
-                                .toUpperCase()}
-                        </div>
+                        {/* AVATAR */}
+<div
+    onClick={handleChangeAvatar}
+    className="
+        h-24
+        w-24
+        rounded-full
+        overflow-hidden
+        cursor-pointer
+        border-2
+        border-white/10
+        hover:border-white/30
+        transition
+        relative
+        group
+    "
+>
+
+    {user.avatar ? (
+
+        <img
+            src={user.avatar}
+            alt={user.name}
+            className="
+                h-full
+                w-full
+                object-cover
+            "
+        />
+
+    ) : (
+
+        <div
+            className="
+                h-full
+                w-full
+                bg-gradient-to-br
+                from-purple-500
+                to-blue-500
+                flex
+                items-center
+                justify-center
+                text-3xl
+                font-bold
+            "
+        >
+            {user.name
+                .charAt(0)
+                .toUpperCase()}
+        </div>
+
+    )}
+
+    {/* Overlay */}
+    <div
+        className="
+            absolute
+            inset-0
+            bg-black/60
+            opacity-0
+            group-hover:opacity-100
+            transition
+            flex
+            items-center
+            justify-center
+            text-xs
+            font-medium
+        "
+    >
+        Cambiar
+    </div>
+
+</div>
 
                         {/* INFO */}
                         <div>
