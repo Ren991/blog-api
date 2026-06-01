@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,13 @@ Route::post('/login', [AuthController::class, 'login']);
 */
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    // users
+
+    Route::get(
+        '/users/{id}/profile',
+        [UserController::class, 'profile']
+    );
 
     // Posts
     Route::apiResource('posts', PostController::class);
