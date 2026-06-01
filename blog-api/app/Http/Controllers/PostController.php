@@ -148,7 +148,7 @@ class PostController extends Controller
     }
 
       // =========================
-    // SORT (🔥 ESTO TE FALTABA)
+    // SORT
     // =========================
     $sort = $request->query('sort', 'latest');
 
