@@ -11,10 +11,10 @@ export default function Navbar() {
 
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/60 backdrop-blur-xl">
-      
+
       {/* BRAND */}
       <Link href="/" className="text-xl font-bold">
-      Merge Conflict
+        Merge Conflict
       </Link>
 
       {/* RIGHT SIDE */}
@@ -23,13 +23,13 @@ export default function Navbar() {
         {isAuthenticated ? (
           <>
             {/* PROFILE */}
-            
-             <Link
-    href="/profile"
-    className="flex items-center gap-3"
->
-    <div
-        className="
+
+            <Link
+              href="/profile"
+              className="flex items-center gap-3"
+            >
+              <div
+                className="
             h-10
             w-10
             rounded-full
@@ -37,23 +37,23 @@ export default function Navbar() {
             border border-white/10
             shrink-0
         "
-    >
-        {user?.avatar ? (
+              >
+                {user?.avatar ? (
 
-            <img
-                src={user.avatar}
-                alt={user.name}
-                className="
+                  <img
+                    src={user.avatar}
+                    alt={user.name}
+                    className="
                     h-full
                     w-full
                     object-cover
                 "
-            />
+                  />
 
-        ) : (
+                ) : (
 
-            <div
-                className="
+                  <div
+                    className="
                     h-full
                     w-full
                     bg-gradient-to-br
@@ -65,17 +65,17 @@ export default function Navbar() {
                     text-sm
                     font-bold
                 "
-            >
-                {user?.name.charAt(0).toUpperCase()}
-            </div>
+                  >
+                    {user?.name.charAt(0).toUpperCase()}
+                  </div>
 
-        )}
-    </div>
+                )}
+              </div>
 
-    <span className="text-sm text-white">
-        {user?.name}
-    </span>
-</Link>
+              <span className="text-sm text-white">
+                {user?.name}
+              </span>
+            </Link>
 
             {/* LOGOUT */}
             <button
