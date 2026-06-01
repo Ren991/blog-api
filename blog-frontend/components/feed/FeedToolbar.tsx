@@ -12,10 +12,14 @@ import { useMemo, useState } from "react";
 
 type Props = {
     onSearch: (value: string) => void;
+    sort: string;
+    onSort: (value: string) => void;
 };
 
 export default function FeedToolbar({
     onSearch,
+    sort,
+    onSort
 }: Props) {
 
     const [value, setValue] = useState("");
@@ -162,6 +166,15 @@ Buscar posts, contenido o #tags...
                     >
                         <Search size={18} />
                     </button>
+
+                    <select
+                        value={sort}
+                        onChange={(e) => onSort(e.target.value)}
+                    >
+                        <option value="latest">Más recientes</option>
+                        <option value="liked">Más likeados</option>
+                        <option value="relevant">Más relevantes</option>
+                    </select>
 
                 </div>
 

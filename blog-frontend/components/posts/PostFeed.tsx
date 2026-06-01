@@ -11,7 +11,7 @@ type Post = {
   title: string;
   content: string;
   created_at: string;
-  user: { 
+  user: {
     id: number;
     name: string;
     avatar?: string | null;
@@ -28,29 +28,30 @@ export default function PostFeed() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("latest"); // 🔥 NUEVO
 
   const observer = useRef<IntersectionObserver | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   // =========================
-  // RESET when search changes
+  // RESET (search OR sort change)
   // =========================
   useEffect(() => {
     setPosts([]);
     setPage(1);
     setHasMore(true);
-  }, [search]);
+  }, [search, sort]);
 
   // =========================
   // FETCH POSTS
   // =========================
   const fetchPosts = useCallback(
-    async (pageNumber: number, searchValue: string) => {
+    async (pageNumber: number, searchValue: string, sortValue: string) => {
       if (!token) return;
       if (loading) return;
 
-      // abort previous request
       if (abortRef.current) {
         abortRef.current.abort();
       }
@@ -64,13 +65,12 @@ export default function PostFeed() {
         const data = await getPosts(
           pageNumber,
           searchValue,
+          sortValue,
           controller.signal
         );
 
         setPosts((prev) =>
-          pageNumber === 1
-            ? data.data
-            : [...prev, ...data.data]
+          pageNumber === 1 ? data.data : [...prev, ...data.data]
         );
 
         setHasMore(pageNumber < data.last_page);
@@ -86,12 +86,13 @@ export default function PostFeed() {
   );
 
   // =========================
-  // INITIAL + PAGE FETCH
+  // EFFECT FETCH
   // =========================
   useEffect(() => {
     if (!token) return;
-    fetchPosts(page, search);
-  }, [page, search, token]);
+
+    fetchPosts(page, search, sort);
+  }, [page, search, sort, token]);
 
   // =========================
   // INFINITE SCROLL
@@ -122,7 +123,13 @@ export default function PostFeed() {
   // =========================
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
-      <FeedToolbar onSearch={setSearch} />
+
+      {/* 🔥 TOOLBAR (search + sort) */}
+      <FeedToolbar
+        onSearch={setSearch}
+        sort={sort}
+        onSort={setSort}
+      />
 
       <h1 className="text-2xl font-bold mb-6">Feed</h1>
 
@@ -131,10 +138,7 @@ export default function PostFeed() {
           const isLast = index === posts.length - 1;
 
           return (
-            <div
-              key={post.id}
-              ref={isLast ? lastPostRef : null}
-            >
+            <div key={post.id} ref={isLast ? lastPostRef : null}>
               <PostCard post={post} />
             </div>
           );

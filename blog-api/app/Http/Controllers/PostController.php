@@ -147,6 +147,28 @@ class PostController extends Controller
         });
     }
 
+      // =========================
+    // SORT (🔥 ESTO TE FALTABA)
+    // =========================
+    $sort = $request->query('sort', 'latest');
+
+    switch ($sort) {
+
+        case 'liked':
+            $query->orderBy('likes_count', 'desc');
+            break;
+
+        case 'relevant':
+            // ranking simple (ajustable)
+            $query->orderByRaw('(likes_count * 2 + comments_count) DESC');
+            break;
+
+        case 'latest':
+        default:
+            $query->orderBy('created_at', 'desc');
+            break;
+    }
+
     /**
      * =========================
      * PAGINATION

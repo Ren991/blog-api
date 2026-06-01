@@ -22,7 +22,7 @@ import { api } from "./api";
 
     return res.data.data;
 }; */
-export const getPosts = async (
+/* export const getPosts = async (
   page: number,
   search: string,
   signal?: AbortSignal
@@ -31,6 +31,23 @@ export const getPosts = async (
     params: {
       page,
       search,
+    },
+    signal,
+  });
+
+  return res.data;
+}; */
+export const getPosts = async (
+  page: number = 1,
+  search: string = "",
+  sort: string = "latest",
+  signal?: AbortSignal
+) => {
+  const res = await api.get("/posts", {
+    params: {
+      page,
+      search,
+      sort,
     },
     signal,
   });
