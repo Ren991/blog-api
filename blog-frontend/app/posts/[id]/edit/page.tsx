@@ -139,7 +139,11 @@ export default function EditPostPage() {
             return false;
         }
 
-        if (!content.trim()) {
+        const cleanContent = content
+            .replace(/<[^>]*>/g, '') // Elimina todos los tags HTML
+            .trim();
+
+        if (!cleanContent) {
             Swal.fire({
                 icon: "warning",
                 title: "El contenido es obligatorio",

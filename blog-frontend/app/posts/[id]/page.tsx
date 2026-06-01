@@ -525,21 +525,17 @@ export default function PostDetailPage() {
                         by {post.user?.name}
                     </p>
 
-                   {/*  <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                    >
-                        {post.content}
-                    </ReactMarkdown> */}
+            
                     <div
-    className="
-        prose
-        prose-invert
-        max-w-none
-    "
-    dangerouslySetInnerHTML={{
-        __html: post.content,
-    }}
-/>
+                        className="
+                            prose
+                            prose-invert
+                            max-w-none
+                        "
+                        dangerouslySetInnerHTML={{
+                            __html: post.content,
+                        }}
+                    />
                     {/* TAGS */}
                     {post.tags &&
                         post.tags.length > 0 && (

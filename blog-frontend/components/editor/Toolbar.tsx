@@ -14,7 +14,8 @@ import {
     Plus,
     Minus,
     Smile,
-    ImageIcon
+    ImageIcon,
+    Trash2
 } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
 import { uploadImage } from "@/services/upload.service";
@@ -35,6 +36,7 @@ export default function Toolbar({ editor }: Props) {
     const [rows, setRows] = useState(3);
     const [cols, setCols] = useState(3);
     const [showEmoji, setShowEmoji] = useState(false);
+    const [isImageSelected, setIsImageSelected] = useState(false);
 
     const menuRef = useRef<HTMLDivElement | null>(null);
     const pickerRef = useRef<HTMLDivElement>(null);
@@ -81,6 +83,21 @@ export default function Toolbar({ editor }: Props) {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    // Detectar cuando una imagen está seleccionada
+    useEffect(() => {
+        const updateImageSelection = () => {
+            setIsImageSelected(editor.isActive("image"));
+        };
+
+        editor.on("selectionUpdate", updateImageSelection);
+        editor.on("update", updateImageSelection);
+
+        return () => {
+            editor.off("selectionUpdate", updateImageSelection);
+            editor.off("update", updateImageSelection);
+        };
+    }, [editor]);
 
     return (
         <div
@@ -441,6 +458,24 @@ export default function Toolbar({ editor }: Props) {
             >
                 <ImageIcon size={18} />
             </button>
+
+            {/* DELETE IMAGE - Solo mostrar si hay una imagen seleccionada */}
+            {isImageSelected && (
+                <button
+                    type="button"
+                    className={`${buttonClass} bg-red-500/20 hover:bg-red-500/30`}
+                    onClick={() => {
+                        editor
+                            .chain()
+                            .focus()
+                            .deleteSelection()
+                            .run();
+                    }}
+                    title="Eliminar imagen"
+                >
+                    <Trash2 size={18} />
+                </button>
+            )}
         </div>
     );
 }
