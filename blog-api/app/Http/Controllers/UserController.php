@@ -35,7 +35,7 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'avatar' => $user->avatar
-                    ? asset('storage/' . $user->avatar)
+                    ? config('app.url') . '/storage/' . $user->avatar
                     : null,
             ],
 
@@ -72,7 +72,8 @@ class UserController extends Controller
         ]);
 
         return response()->json([
-            'avatar' => asset('storage/' . $path),
+            'avatar' => config('app.url') . '/storage/' . $path,
+
         ]);
     }
 }

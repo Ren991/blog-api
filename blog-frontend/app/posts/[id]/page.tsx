@@ -80,6 +80,7 @@ type Post = {
     is_liked?: boolean;
 };
 
+
 export default function PostDetailPage() {
 
     const { id } = useParams();
@@ -159,6 +160,7 @@ export default function PostDetailPage() {
 
     }, [id]);
 
+    console.log(post);
     // =========================
     // DELETE POST
     // =========================

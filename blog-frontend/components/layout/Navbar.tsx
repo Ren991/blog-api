@@ -7,6 +7,8 @@ import { LogOut, User } from "lucide-react";
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
 
+  console.log(user)
+
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/60 backdrop-blur-xl">
       
@@ -21,18 +23,59 @@ export default function Navbar() {
         {isAuthenticated ? (
           <>
             {/* PROFILE */}
-            <Link
-              href="/profile"
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 hover:bg-white/10 transition"
-            >
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-sm font-bold">
-                {user?.name?.charAt(0).toUpperCase()}
-              </div>
+            
+             <Link
+    href="/profile"
+    className="flex items-center gap-3"
+>
+    <div
+        className="
+            h-10
+            w-10
+            rounded-full
+            overflow-hidden
+            border border-white/10
+            shrink-0
+        "
+    >
+        {user?.avatar ? (
 
-              <span className="text-sm text-white">
-                {user?.name}
-              </span>
-            </Link>
+            <img
+                src={user.avatar}
+                alt={user.name}
+                className="
+                    h-full
+                    w-full
+                    object-cover
+                "
+            />
+
+        ) : (
+
+            <div
+                className="
+                    h-full
+                    w-full
+                    bg-gradient-to-br
+                    from-purple-500
+                    to-blue-500
+                    flex
+                    items-center
+                    justify-center
+                    text-sm
+                    font-bold
+                "
+            >
+                {user?.name.charAt(0).toUpperCase()}
+            </div>
+
+        )}
+    </div>
+
+    <span className="text-sm text-white">
+        {user?.name}
+    </span>
+</Link>
 
             {/* LOGOUT */}
             <button
