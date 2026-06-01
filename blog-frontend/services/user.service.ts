@@ -33,3 +33,14 @@ export const uploadAvatar = async (
 
     return res.data;
 };
+
+export const updateUsername = async (
+    name: string
+) => {
+    const res = await api.put(
+        "/user/name",
+        { name }
+    );
+
+    return res.data;
+};

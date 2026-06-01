@@ -3,7 +3,7 @@
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import {uploadAvatar} from "@/services/user.service";
+import {uploadAvatar, updateUsername} from "@/services/user.service";
 
 import {
     LogOut,
@@ -177,6 +177,64 @@ export default function ProfilePage() {
     input.click();
 };
 
+const handleChangeUsername = async () => {
+
+    const result = await Swal.fire({
+        title: "Cambiar nombre de usuario",
+        input: "text",
+        inputLabel: "Nuevo nombre",
+        inputPlaceholder: "Ingresa tu nuevo nombre",
+        inputAttributes: {
+            minlength: "3",
+            maxlength: "50",
+        },
+        showCancelButton: true,
+        confirmButtonText: "Cambiar",
+        cancelButtonText: "Cancelar",
+        inputValidator: (value) => {
+            if (!value) {
+                return "El nombre no puede estar vacío";
+            }
+            if (value.length < 3) {
+                return "El nombre debe tener al menos 3 caracteres";
+            }
+            if (value.length > 50) {
+                return "El nombre no puede exceder 50 caracteres";
+            }
+        }
+    });
+
+    if (!result.isConfirmed || !result.value) return;
+
+    try {
+
+        const response = await updateUsername(result.value);
+
+        updateUser({
+            ...user!,
+            name: result.value,
+        });
+
+        Swal.fire({
+            icon: "success",
+            title: "Nombre actualizado",
+            text: "Tu nombre ha sido cambiado exitosamente",
+            timer: 1500,
+            showConfirmButton: false,
+        });
+
+    } catch (err: any) {
+
+        console.error(err);
+
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: err.response?.data?.message || "Error actualizando el nombre",
+        });
+    }
+};
+
     return (
         <main className="min-h-screen bg-black text-white px-6 py-10">
 
@@ -329,6 +387,24 @@ export default function ProfilePage() {
 
                     {/* ACTIONS */}
                     <div className="mt-8 flex flex-wrap gap-3">
+
+                        {!user.name_changed_at && (
+                            <button
+                                onClick={handleChangeUsername}
+                                className="
+                                    flex items-center
+                                    gap-2
+                                    rounded-xl
+                                    bg-blue-500/10
+                                    text-blue-400
+                                    px-5 py-3
+                                    hover:bg-blue-500/20
+                                    transition
+                                "
+                            >
+                                Cambiar nombre
+                            </button>
+                        )}
 
                         <button
                             onClick={logout}

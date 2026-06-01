@@ -12,6 +12,7 @@ type User = {
   name: string;
   email: string;
   avatar?: string | null;
+  name_changed_at?: string | null;
 };
 
 type AuthContextType = {

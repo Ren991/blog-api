@@ -76,4 +76,30 @@ class UserController extends Controller
 
         ]);
     }
+
+    public function updateName(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|min:3|max:50',
+        ]);
+
+        $user = auth()->user();
+
+        // 🚨 regla: solo 1 vez
+        if ($user->name_changed_at !== null) {
+            return response()->json([
+                'message' => 'El nombre solo puede cambiarse una vez'
+            ], 403);
+        }
+
+        $user->update([
+            'name' => $request->name,
+            'name_changed_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Nombre actualizado correctamente',
+            'user' => $user,
+        ]);
+    }
 }

@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
         [UserController::class, 'updateAvatar']
     );
 
+    Route::put('/user/name', [UserController::class, 'updateName']);
     // Posts
     Route::apiResource('posts', PostController::class);
     Route::get('/posts/{id}', [PostController::class, 'show']);
