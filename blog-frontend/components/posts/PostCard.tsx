@@ -25,6 +25,7 @@ type Post = {
 
     user: {
         name: string;
+        id: number;
     };
 
     likes_count?: number;
@@ -129,7 +130,16 @@ export default function PostCard({
             {/* USER */}
             <div className="text-sm text-zinc-400">
 
-                Creado por : {post.user.name}
+                {/* Creado por : {post.user.name} */}
+                <Link
+    href={`/users/${post.user.id}`}
+    className="
+        hover:text-white
+        transition
+    "
+>
+    {post.user.name}
+</Link>
 
             </div>
 
