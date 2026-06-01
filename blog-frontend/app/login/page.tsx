@@ -37,7 +37,7 @@ export default function LoginPage() {
                 password,
             });
 
-             setAuth(response.token, response.user);
+            setAuth(response.token, response.user);
 
             toast.success("Bienvenid@ 🚀");
 
@@ -174,6 +174,16 @@ export default function LoginPage() {
                                 ? "Ingresando..."
                                 : "Iniciar sesión"}
                         </button>
+
+                        <div className="mt-6 text-center text-sm text-zinc-400">
+                            ¿No tienes una cuenta?{" "}
+                            <Link
+                                href="/register"
+                                className="text-white font-semibold hover:underline"
+                            >
+                                Regístrate
+                            </Link>
+                        </div>
                     </div>
                 </motion.div>
             </section>

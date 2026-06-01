@@ -180,6 +180,15 @@ export default function RegisterPage() {
                                 ? "Creando cuenta..."
                                 : "Crear cuenta"}
                         </button>
+                        <div className="mt-6 text-center text-sm text-zinc-400">
+                            ¿Ya tienes una cuenta?{" "}
+                            <Link
+                                href="/login"
+                                className="text-white font-semibold hover:underline"
+                            >
+                                Inicia sesión
+                            </Link>
+                        </div>
                     </div>
                 </motion.div>
             </section>
