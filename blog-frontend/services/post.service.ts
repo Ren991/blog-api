@@ -1,42 +1,6 @@
 import { api } from "./api";
 
-/* export const getPosts = async (token: string) => {
-  const res = await api.get("/posts", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
 
-  return res.data.data;
-}; */
-/* export const getPosts = async (
-    token: string,
-    search?: string
-) => {
-
-    const res = await api.get("/posts", {
-        params: {
-            search,
-        },
-    });
-
-    return res.data.data;
-}; */
-/* export const getPosts = async (
-  page: number,
-  search: string,
-  signal?: AbortSignal
-) => {
-  const res = await api.get("/posts", {
-    params: {
-      page,
-      search,
-    },
-    signal,
-  });
-
-  return res.data;
-}; */
 export const getPosts = async (
   page: number = 1,
   search: string = "",

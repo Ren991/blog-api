@@ -29,7 +29,7 @@ export default function RegisterPage() {
 
             setLoading(true);
 
-            const response = await register({
+            await register({
                 name,
                 email,
                 password,

@@ -120,12 +120,13 @@ export default function LoginPage() {
 
                         {/* EMAIL */}
                         <div>
-                            <label className="mb-2 block text-sm text-zinc-400">
+                            <label htmlFor="email" className="mb-2 block text-sm text-zinc-400">
                                 Correo electrónico
                             </label>
 
                             <input
                                 type="email"
+                                id="email"
                                 placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -135,7 +136,7 @@ export default function LoginPage() {
 
                         {/* PASSWORD */}
                         <div>
-                            <label className="mb-2 block text-sm text-zinc-400">
+                            <label htmlFor="password" className="mb-2 block text-sm text-zinc-400">
                                 Contraseña
                             </label>
 
@@ -143,6 +144,7 @@ export default function LoginPage() {
 
                                 <input
                                     type={showPassword ? "text" : "password"}
+                                    id="password"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}

@@ -1,151 +1,189 @@
 "use client";
 
 import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    useMemo,
+    useCallback,
 } from "react";
 
 type User = {
-  id: number;
-  name: string;
-  email: string;
-  avatar?: string | null;
-  name_changed_at?: string | null;
+    id: number;
+    name: string;
+    email: string;
+    avatar?: string | null;
+    name_changed_at?: string | null;
 };
 
 type AuthContextType = {
-  user: User | null;
-  token: string | null;
+    user: User | null;
+    token: string | null;
 
-  login: (
-    token: string,
-    user: User
-  ) => void;
+    login: (
+        token: string,
+        user: User
+    ) => void;
 
-  logout: () => void;
+    logout: () => void;
 
-  updateUser: (
-    user: User
-  ) => void;
+    updateUser: (
+        user: User
+    ) => void;
 
-  isAuthenticated: boolean;
+    isAuthenticated: boolean;
 };
 
 const AuthContext =
-  createContext<AuthContextType | null>(null);
+    createContext<AuthContextType | null>(
+        null
+    );
 
 export function AuthProvider({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
 
-  const [user, setUser] =
-    useState<User | null>(null);
+    const [user, setUser] =
+        useState<User | null>(null);
 
-  const [token, setToken] =
-    useState<string | null>(null);
+    const [token, setToken] =
+        useState<string | null>(null);
 
-  useEffect(() => {
+    useEffect(() => {
 
-    const storedToken =
-      localStorage.getItem("token");
+        const storedToken =
+            localStorage.getItem("token");
 
-    const storedUser =
-      localStorage.getItem("user");
+        const storedUser =
+            localStorage.getItem("user");
 
-    if (storedToken && storedUser) {
+        if (
+            storedToken &&
+            storedUser
+        ) {
+            setToken(storedToken);
 
-      setToken(storedToken);
+            setUser(
+                JSON.parse(storedUser)
+            );
+        }
 
-      setUser(
-        JSON.parse(storedUser)
-      );
-    }
+    }, []);
 
-  }, []);
+    // =========================
+    // LOGIN
+    // =========================
 
-  // =========================
-  // LOGIN
-  // =========================
-  const login = (
-    newToken: string,
-    newUser: User
-  ) => {
+    const login = useCallback(
+        (
+            newToken: string,
+            newUser: User
+        ) => {
 
-    localStorage.setItem(
-      "token",
-      newToken
+            localStorage.setItem(
+                "token",
+                newToken
+            );
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(newUser)
+            );
+
+            setToken(newToken);
+            setUser(newUser);
+
+        },
+        []
     );
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify(newUser)
+    // =========================
+    // LOGOUT
+    // =========================
+
+    const logout = useCallback(() => {
+
+        localStorage.removeItem(
+            "token"
+        );
+
+        localStorage.removeItem(
+            "user"
+        );
+
+        setToken(null);
+        setUser(null);
+
+    }, []);
+
+    // =========================
+    // UPDATE USER
+    // =========================
+
+    const updateUser = useCallback(
+        (
+            updatedUser: User
+        ) => {
+
+            localStorage.setItem(
+                "user",
+                JSON.stringify(
+                    updatedUser
+                )
+            );
+
+            setUser(updatedUser);
+
+        },
+        []
     );
 
-    setToken(newToken);
+    // =========================
+    // MEMOIZED CONTEXT VALUE
+    // =========================
 
-    setUser(newUser);
-  };
-
-  // =========================
-  // LOGOUT
-  // =========================
-  const logout = () => {
-
-    localStorage.removeItem("token");
-
-    localStorage.removeItem("user");
-
-    setToken(null);
-
-    setUser(null);
-  };
-
-  // =========================
-  // UPDATE USER
-  // =========================
-  const updateUser = (
-    updatedUser: User
-  ) => {
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(updatedUser)
+    const contextValue = useMemo(
+        () => ({
+            user,
+            token,
+            login,
+            logout,
+            updateUser,
+            isAuthenticated:
+                !!token,
+        }),
+        [
+            user,
+            token,
+            login,
+            logout,
+            updateUser,
+        ]
     );
 
-    setUser(updatedUser);
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        login,
-        logout,
-        updateUser,
-        isAuthenticated: !!token,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider
+            value={contextValue}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 export function useAuth() {
 
-  const context =
-    useContext(AuthContext);
+    const context =
+        useContext(AuthContext);
 
-  if (!context) {
+    if (!context) {
 
-    throw new Error(
-      "useAuth debe usarse dentro de AuthProvider"
-    );
-  }
+        throw new Error(
+            "useAuth debe usarse dentro de AuthProvider"
+        );
+    }
 
-  return context;
+    return context;
 }

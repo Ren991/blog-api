@@ -3,7 +3,7 @@
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
-import {uploadAvatar, updateUsername} from "@/services/user.service";
+import { uploadAvatar, updateUsername } from "@/services/user.service";
 
 import {
     LogOut,
@@ -117,123 +117,122 @@ export default function ProfilePage() {
     // =========================
     const handleChangeAvatar = async () => {
 
-    const result = await Swal.fire({
-        title: "¿Desea cambiar su avatar?",
-        text: "Seleccione una imagen",
-        icon: "question",
+        const result = await Swal.fire({
+            title: "¿Desea cambiar su avatar?",
+            text: "Seleccione una imagen",
+            icon: "question",
 
-        showCancelButton: true,
+            showCancelButton: true,
 
-        confirmButtonText: "Sí",
+            confirmButtonText: "Sí",
 
-        cancelButtonText: "No",
-    });
+            cancelButtonText: "No",
+        });
 
-    if (!result.isConfirmed) return;
+        if (!result.isConfirmed) return;
 
-    const input =
-        document.createElement("input");
+        const input =
+            document.createElement("input");
 
-    input.type = "file";
+        input.type = "file";
 
-    input.accept = "image/*";
+        input.accept = "image/*";
 
-    input.onchange = async () => {
+        input.onchange = async () => {
 
-        const file =
-            input.files?.[0];
+            const file =
+                input.files?.[0];
 
-        if (!file) return;
+            if (!file) return;
+
+            try {
+
+                const response =
+                    await uploadAvatar(file);
+
+                updateUser({
+                    ...user!,
+                    avatar: response.avatar,
+                });
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Avatar actualizado",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+
+            } catch (err) {
+
+                console.error(err);
+
+                Swal.fire({
+                    icon: "error",
+                    title:
+                        "Error actualizando avatar",
+                });
+            }
+        };
+
+        input.click();
+    };
+
+    const handleChangeUsername = async () => {
+
+        const result = await Swal.fire({
+            title: "Cambiar nombre de usuario",
+            input: "text",
+            inputLabel: "Nuevo nombre",
+            inputPlaceholder: "Ingresa tu nuevo nombre",
+            inputAttributes: {
+                minlength: "3",
+                maxlength: "50",
+            },
+            showCancelButton: true,
+            confirmButtonText: "Cambiar",
+            cancelButtonText: "Cancelar",
+            inputValidator: (value) => {
+                if (!value) {
+                    return "El nombre no puede estar vacío";
+                }
+                if (value.length < 3) {
+                    return "El nombre debe tener al menos 3 caracteres";
+                }
+                if (value.length > 50) {
+                    return "El nombre no puede exceder 50 caracteres";
+                }
+            }
+        });
+
+        if (!result.isConfirmed || !result.value) return;
 
         try {
 
-            const response =
-                await uploadAvatar(file);
 
             updateUser({
                 ...user!,
-                avatar: response.avatar,
+                name: result.value,
             });
 
             Swal.fire({
                 icon: "success",
-                title: "Avatar actualizado",
+                title: "Nombre actualizado",
+                text: "Tu nombre ha sido cambiado exitosamente",
                 timer: 1500,
                 showConfirmButton: false,
             });
 
-        } catch (err) {
+        } catch (err: any) {
 
             console.error(err);
 
             Swal.fire({
                 icon: "error",
-                title:
-                    "Error actualizando avatar",
+                title: "Error",
+                text: err.response?.data?.message || "Error actualizando el nombre",
             });
         }
     };
-
-    input.click();
-};
-
-const handleChangeUsername = async () => {
-
-    const result = await Swal.fire({
-        title: "Cambiar nombre de usuario",
-        input: "text",
-        inputLabel: "Nuevo nombre",
-        inputPlaceholder: "Ingresa tu nuevo nombre",
-        inputAttributes: {
-            minlength: "3",
-            maxlength: "50",
-        },
-        showCancelButton: true,
-        confirmButtonText: "Cambiar",
-        cancelButtonText: "Cancelar",
-        inputValidator: (value) => {
-            if (!value) {
-                return "El nombre no puede estar vacío";
-            }
-            if (value.length < 3) {
-                return "El nombre debe tener al menos 3 caracteres";
-            }
-            if (value.length > 50) {
-                return "El nombre no puede exceder 50 caracteres";
-            }
-        }
-    });
-
-    if (!result.isConfirmed || !result.value) return;
-
-    try {
-
-        const response = await updateUsername(result.value);
-
-        updateUser({
-            ...user!,
-            name: result.value,
-        });
-
-        Swal.fire({
-            icon: "success",
-            title: "Nombre actualizado",
-            text: "Tu nombre ha sido cambiado exitosamente",
-            timer: 1500,
-            showConfirmButton: false,
-        });
-
-    } catch (err: any) {
-
-        console.error(err);
-
-        Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: err.response?.data?.message || "Error actualizando el nombre",
-        });
-    }
-};
 
     return (
         <main className="min-h-screen bg-black text-white px-6 py-10">
@@ -273,78 +272,78 @@ const handleChangeUsername = async () => {
 
                         {/* AVATAR */}
                         {/* AVATAR */}
-<div
-    onClick={handleChangeAvatar}
-    className="
-        h-24
-        w-24
-        rounded-full
-        overflow-hidden
-        cursor-pointer
-        border-2
-        border-white/10
-        hover:border-white/30
-        transition
-        relative
-        group
-    "
->
+                        <div
+                            onClick={handleChangeAvatar}
+                            className="
+                                    h-24
+                                    w-24
+                                    rounded-full
+                                    overflow-hidden
+                                    cursor-pointer
+                                    border-2
+                                    border-white/10
+                                    hover:border-white/30
+                                    transition
+                                    relative
+                                    group
+                                "
+                                >
 
-    {user.avatar ? (
+                            {user.avatar ? (
 
-        <img
-            src={user.avatar}
-            alt={user.name}
-            className="
-                h-full
-                w-full
-                object-cover
-            "
-        />
+                                <img
+                                    src={user.avatar}
+                                    alt={user.name}
+                                    className="
+                                        h-full
+                                        w-full
+                                        object-cover
+                                    "
+                                />
 
-    ) : (
+                            ) : (
 
-        <div
-            className="
-                h-full
-                w-full
-                bg-gradient-to-br
-                from-purple-500
-                to-blue-500
-                flex
-                items-center
-                justify-center
-                text-3xl
-                font-bold
-            "
-        >
-            {user.name
-                .charAt(0)
-                .toUpperCase()}
-        </div>
+                                <div
+                                    className="
+                                        h-full
+                                        w-full
+                                        bg-gradient-to-br
+                                        from-purple-500
+                                        to-blue-500
+                                        flex
+                                        items-center
+                                        justify-center
+                                        text-3xl
+                                        font-bold
+                                    "
+                                    >
+                                    {user.name
+                                        .charAt(0)
+                                        .toUpperCase()}
+                                </div>
 
-    )}
+                            )}
 
-    {/* Overlay */}
-    <div
-        className="
-            absolute
-            inset-0
-            bg-black/60
-            opacity-0
-            group-hover:opacity-100
-            transition
-            flex
-            items-center
-            justify-center
-            text-xs
-            font-medium
-        "
-    >
-        Cambiar
-    </div>
+                            {/* Overlay */}
+                            <div
+                                className="
+                                absolute
+                                inset-0
+                                bg-black/60
+                                opacity-0
+                                group-hover:opacity-100
+                                transition
+                                flex
+                                items-center
+                                justify-center
+                                text-xs
+                                font-medium
+                                "
+                            >
+                                Cambiar
+                            </div>
 
-</div>
+                        </div>
 
                         {/* INFO */}
                         <div>

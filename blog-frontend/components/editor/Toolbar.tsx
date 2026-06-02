@@ -261,10 +261,11 @@ export default function Toolbar({ editor }: Props) {
                             </p>
 
                             {/* ROWS */}
-                            <label className="text-xs text-zinc-500">
+                            <label htmlFor="rows" className="text-xs text-zinc-500">
                                 Filas
                             </label>
                             <input
+                                id="rows"
                                 type="number"
                                 min={1}
                                 max={20}
@@ -285,10 +286,11 @@ export default function Toolbar({ editor }: Props) {
                             />
 
                             {/* COLS */}
-                            <label className="text-xs text-zinc-500">
+                            <label htmlFor="cols" className="text-xs text-zinc-500">
                                 Columnas
                             </label>
                             <input
+                                id="cols"
                                 type="number"
                                 min={1}
                                 max={10}
@@ -353,7 +355,6 @@ export default function Toolbar({ editor }: Props) {
 
                                 <button
                                     onClick={() => {
-                                        const table = editor.getAttributes("table");
 
                                         const currentCols =
                                             editor.state.doc

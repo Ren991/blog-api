@@ -160,11 +160,12 @@ export default function CreatePostPage() {
                 {/* INPUT TITLE */}
                 <div className="mb-4">
 
-                    <label className="block mb-2 text-sm text-zinc-400">
+                    <label htmlFor="title" className="block mb-2 text-sm text-zinc-400">
                         Título
                     </label>
 
                     <input
+                        id="title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Título del post..."
@@ -182,7 +183,7 @@ export default function CreatePostPage() {
                 {/* CONTENT */}
                 <div className="mb-6">
 
-                    <label className="block mb-2 text-sm text-zinc-400">
+                    <label htmlFor="content" className="block mb-2 text-sm text-zinc-400">
                         Contenido
                     </label>
 
@@ -200,12 +201,13 @@ export default function CreatePostPage() {
                 {/* TAGS */}
                 <div className="mb-6">
 
-                    <label className="block mb-2 text-sm text-zinc-400">
+                    <label htmlFor="tags" className="block mb-2 text-sm text-zinc-400">
                         Tags
                     </label>
 
                     {/* TAG INPUT */}
                     <input
+                        id="tags"
                         value={tagInput}
                         onChange={(e) => setTagInput(e.target.value)}
                         onKeyDown={handleTagKeyDown}
