@@ -167,13 +167,32 @@ Buscar posts, contenido o #tags...
                         <Search size={18} />
                     </button>
 
-                    <select
+                    {/* <select
                         value={sort}
                         onChange={(e) => onSort(e.target.value)}
                     >
                         <option value="latest">Más recientes</option>
                         <option value="liked">Más likeados</option>
                         <option value="relevant">Más relevantes</option>
+                    </select> */}
+                    <select
+                    value={sort}
+                    onChange={(e) => onSort(e.target.value)}
+                    className="
+                        bg-black/40
+                        border border-white/10
+                        text-white
+                        px-4 py-2
+                        rounded-xl
+                        outline-none
+                        focus:border-white/30
+                        transition
+                        cursor-pointer
+                    "
+                    >
+                    <option value="latest">Más recientes</option>
+                    <option value="liked">Más likeados</option>
+                    <option value="relevant">Más relevantes</option>
                     </select>
 
                 </div>
