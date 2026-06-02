@@ -12,6 +12,7 @@ use App\Models\Like;
 use Laravel\Sanctum\Sanctum;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+CONST POST_ROUTE = '/api/posts';
 
 class PostTest extends TestCase
 {
@@ -26,7 +27,7 @@ class PostTest extends TestCase
     {
         Post::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/posts');
+        $response = $this->getJson(POST_ROUTE);
 
         $response->assertStatus(200);
     }
@@ -41,7 +42,7 @@ class PostTest extends TestCase
         $post = Post::factory()->create();
 
         $response = $this->getJson(
-            "/api/posts/{$post->id}"
+            POST_ROUTE . "/{$post->id}"
         );
 
         $response->assertStatus(200);
@@ -59,7 +60,7 @@ class PostTest extends TestCase
         Sanctum::actingAs($user);
 
         $response = $this->postJson(
-            '/api/posts',
+            POST_ROUTE,
             [
                 'title' => 'Mi Post',
                 'content' => 'Contenido test',
@@ -84,7 +85,7 @@ class PostTest extends TestCase
     public function test_guest_cannot_create_post(): void
     {
         $response = $this->postJson(
-            '/api/posts',
+            POST_ROUTE,
             [
                 'title' => 'Test',
                 'content' => 'Contenido'
@@ -110,7 +111,7 @@ class PostTest extends TestCase
         ]);
 
         $response = $this->putJson(
-            "/api/posts/{$post->id}",
+            POST_ROUTE . "/{$post->id}",
             [
                 'title' => 'Nuevo titulo'
             ]
@@ -145,7 +146,7 @@ class PostTest extends TestCase
         ]);
 
         $response = $this->putJson(
-            "/api/posts/{$post->id}",
+            POST_ROUTE . "/{$post->id}",
             [
                 'title' => 'Hack'
             ]
@@ -170,7 +171,7 @@ class PostTest extends TestCase
         ]);
 
         $response = $this->deleteJson(
-            "/api/posts/{$post->id}"
+            POST_ROUTE . "/{$post->id}"
         );
 
         $response->assertStatus(200);
@@ -201,7 +202,7 @@ class PostTest extends TestCase
         ]);
 
         $response = $this->deleteJson(
-            "/api/posts/{$post->id}"
+            POST_ROUTE . "/{$post->id}"
         );
 
         $response->assertStatus(403);
@@ -223,7 +224,7 @@ class PostTest extends TestCase
         ]);
 
         $response = $this->getJson(
-            '/api/posts?search=Laravel'
+            POST_ROUTE . '?search=Laravel'
         );
 
         $response->assertStatus(200);
@@ -247,7 +248,7 @@ class PostTest extends TestCase
         $post->tags()->attach($tag);
 
         $response = $this->getJson(
-            '/api/posts?search=%23php'
+            POST_ROUTE . '?search=%23php'
         );
 
         $response->assertStatus(200);
@@ -269,7 +270,7 @@ class PostTest extends TestCase
         $post->tags()->attach($tag);
 
         $response = $this->getJson(
-            '/api/posts?tag=laravel'
+            POST_ROUTE . '?tag=laravel'
         );
 
         $response->assertStatus(200);
@@ -287,7 +288,7 @@ class PostTest extends TestCase
             ->create();
 
         $response = $this->getJson(
-            '/api/posts?page=1'
+            POST_ROUTE . '?page=1'
         );
 
         $response->assertStatus(200);
@@ -313,7 +314,7 @@ class PostTest extends TestCase
         $post = Post::factory()->create();
 
         $response = $this->postJson(
-            "/api/posts/{$post->id}/like"
+            POST_ROUTE . "/{$post->id}/like"
         );
 
         $response->assertStatus(200);
@@ -338,7 +339,7 @@ class PostTest extends TestCase
         ]);
 
         $response = $this->deleteJson(
-            "/api/posts/{$post->id}/like"
+            POST_ROUTE . "/{$post->id}/like"
         );
 
         $response->assertStatus(200);
@@ -354,7 +355,7 @@ class PostTest extends TestCase
         $post = Post::factory()->create();
 
         $response = $this->getJson(
-            "/api/posts/{$post->id}"
+            POST_ROUTE . "/{$post->id}"
         );
 
         $response->assertStatus(200);

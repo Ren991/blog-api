@@ -8,6 +8,7 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+CONST API_PATTERN = 'api/*';
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
@@ -33,7 +34,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $request
         ) {
 
-            if ($request->is('api/*')) {
+            if ($request->is(API_PATTERN)) {
 
                 return response()->json([
                     'message' => 'No autenticado'
@@ -52,7 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $request
         ) {
 
-            if ($request->is('api/*')) {
+            if ($request->is(API_PATTERN)) {
 
                 return response()->json([
                     'message' => 'Validation error',
@@ -72,7 +73,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $request
         ) {
 
-            if ($request->is('api/*')) {
+            if ($request->is(API_PATTERN)) {
 
                 return response()->json([
                     'message' => 'Resource not found'
@@ -91,7 +92,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $request
         ) {
 
-            if ($request->is('api/*')) {
+            if ($request->is(API_PATTERN)) {
 
                 return response()->json([
                     'message' => 'Endpoint not found'
@@ -110,7 +111,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $request
         ) {
 
-            if ($request->is('api/*')) {
+            if ($request->is(API_PATTERN)) {
 
                 return response()->json([
                     'message' => 'No se pudo completar la solicitud'

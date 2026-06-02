@@ -384,23 +384,14 @@ export default function PostDetailPage() {
 
             setPost((prev) => {
 
-                if (!prev) return prev;
+                if (!prev) {
+                    return prev;
+                }
 
-                return {
-
-                    ...prev,
-
-                    comments: prev.comments?.filter(
-                        (c) => c.id !== commentId
-                    ).map((c) => ({
-
-                        ...c,
-
-                        replies: c.replies?.filter(
-                            (r) => r.id !== commentId
-                        ) || [],
-                    })),
-                };
+                return removeCommentFromPost(
+                    prev,
+                    commentId
+                );
             });
 
         } catch (err) {
@@ -409,6 +400,31 @@ export default function PostDetailPage() {
         }
     };
 
+    const removeCommentFromPost = (
+        post: Post,
+        commentId: number
+    ): Post => {
+
+        const comments =
+            post.comments
+                ?.filter(
+                    (comment) =>
+                        comment.id !== commentId
+                )
+                .map((comment) => ({
+                    ...comment,
+                    replies:
+                        comment.replies?.filter(
+                            (reply) =>
+                                reply.id !== commentId
+                        ) || [],
+                })) || [];
+
+        return {
+            ...post,
+            comments,
+        };
+    };
     // =========================
     // EDIT COMMENT
     // =========================
@@ -584,7 +600,7 @@ export default function PostDetailPage() {
                         </Link>
                     </div>
 
-            
+
                     <div
                         className="
                             prose

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Str;
 
+CONST CACHE_PATTERN = 'framework/cache/data';
 return [
 
     /*
@@ -49,14 +50,14 @@ return [
 
         'file' => [
             'driver' => 'file',
-            'path' => storage_path('framework/cache/data'),
-            'lock_path' => storage_path('framework/cache/data'),
+            'path' => storage_path(CACHE_PATTERN),
+            'lock_path' => storage_path(CACHE_PATTERN),
         ],
 
         'storage' => [
             'driver' => 'storage',
             'disk' => env('CACHE_STORAGE_DISK'),
-            'path' => env('CACHE_STORAGE_PATH', 'framework/cache/data'),
+            'path' => env('CACHE_STORAGE_PATH', CACHE_PATTERN),
         ],
 
         'memcached' => [

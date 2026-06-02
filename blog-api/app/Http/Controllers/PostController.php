@@ -17,167 +17,26 @@ class PostController extends Controller
      * LIST POSTS
      * =========================
      */
-      public function index(Request $request)
+    public function index(Request $request)
 {
-    $query = Post::with([
-            'user',
-            'comments.user',
-            'comments.replies.user',
-            'tags',
-            'likes'
-        ])
-        ->withCount([
-            'comments',
-            'likes'
-        ]);
+    $query = $this->buildQuery();
 
-    /**
-     * =========================
-     * GLOBAL SEARCH
-     * =========================
-     *
-     * soporta:
-     *
-     * react
-     * hola mundo
-     * #react
-     * #react #php
-     * react #php
-     * react backend #laravel
-     *
-     */
+    $this->applySearch(
+        $query,
+        $request->input('search')
+    );
 
-    if ($request->filled('search')) {
+    $this->applyTagFilter(
+        $query,
+        $request->input('tag')
+    );
 
-        $search = trim($request->search);
+    $this->applySorting(
+        $query,
+        $request->input('sort', 'latest')
+    );
 
-        $words = preg_split('/\s+/', $search);
-
-        $tags = [];
-        $textWords = [];
-
-        foreach ($words as $word) {
-
-            $word = trim($word);
-
-            if (!$word) {
-                continue;
-            }
-
-            // TAG
-            if (str_starts_with($word, '#')) {
-
-                $tag = strtolower(
-                    ltrim($word, '#')
-                );
-
-                if ($tag !== '') {
-                    $tags[] = $tag;
-                }
-
-            } else {
-
-                $textWords[] = $word;
-            }
-        }
-
-        /**
-         * =========================
-         * TEXT SEARCH
-         * =========================
-         */
-
-        if (!empty($textWords)) {
-
-            $query->where(function ($q) use ($textWords) {
-
-                foreach ($textWords as $word) {
-
-                    $q->where(function ($sub) use ($word) {
-
-                        $sub->where(
-                            'title',
-                            'like',
-                            "%{$word}%"
-                        )
-                        ->orWhere(
-                            'content',
-                            'like',
-                            "%{$word}%"
-                        );
-                    });
-                }
-            });
-        }
-
-        /**
-         * =========================
-         * TAG SEARCH
-         * =========================
-         */
-
-        if (!empty($tags)) {
-
-            foreach ($tags as $tag) {
-
-                $query->whereHas('tags', function ($q) use ($tag) {
-
-                    $q->where(
-                        'name',
-                        $tag
-                    );
-                });
-            }
-        }
-    }
-
-    /**
-     * =========================
-     * SINGLE TAG FILTER
-     * =========================
-     */
-
-    if ($request->filled('tag')) {
-
-        $tag = strtolower($request->tag);
-
-        $query->whereHas('tags', function ($q) use ($tag) {
-
-            $q->where('name', $tag);
-        });
-    }
-
-      // =========================
-    // SORT
-    // =========================
-    $sort = $request->query('sort', 'latest');
-
-    switch ($sort) {
-
-        case 'liked':
-            $query->orderBy('likes_count', 'desc');
-            break;
-
-        case 'relevant':
-            // ranking simple (ajustable)
-            $query->orderByRaw('(likes_count * 2 + comments_count) DESC');
-            break;
-
-        case 'latest':
-        default:
-            $query->orderBy('created_at', 'desc');
-            break;
-    }
-
-    /**
-     * =========================
-     * PAGINATION
-     * =========================
-     */
-
-    $posts = $query
-        ->latest()
-        ->paginate(10);
+    $posts = $query->paginate(10);
 
     return response()->json([
         'data' => PostResource::collection($posts),
@@ -187,6 +46,167 @@ class PostController extends Controller
     ]);
 }
 
+private function buildQuery()
+{
+    return Post::with([
+        'user',
+        'comments.user',
+        'comments.replies.user',
+        'tags',
+        'likes'
+    ])->withCount([
+        'comments',
+        'likes'
+    ]);
+}
+
+private function applySearch($query, ?string $search): void
+{
+    if (!$search) {
+        return;
+    }
+
+    [$textWords, $tags] = $this->parseSearch(
+        trim($search)
+    );
+
+    $this->applyTextSearch(
+        $query,
+        $textWords
+    );
+
+    $this->applyTagSearch(
+        $query,
+        $tags
+    );
+}
+
+private function parseSearch(string $search): array
+{
+    $words = preg_split('/\s+/', $search);
+
+    $tags = [];
+    $textWords = [];
+
+    foreach ($words as $word) {
+
+        $word = trim($word);
+
+        if (!$word) {
+            continue;
+        }
+
+        if (str_starts_with($word, '#')) {
+
+            $tag = strtolower(
+                ltrim($word, '#')
+            );
+
+            if ($tag !== '') {
+                $tags[] = $tag;
+            }
+
+        } else {
+
+            $textWords[] = $word;
+        }
+    }
+
+    return [
+        $textWords,
+        $tags
+    ];
+}
+
+private function applyTextSearch(
+    $query,
+    array $textWords
+): void
+{
+    if (empty($textWords)) {
+        return;
+    }
+
+    $query->where(function ($q) use ($textWords) {
+
+        foreach ($textWords as $word) {
+
+            $q->where(function ($sub) use ($word) {
+
+                $sub->where(
+                    'title',
+                    'like',
+                    "%{$word}%"
+                )->orWhere(
+                    'content',
+                    'like',
+                    "%{$word}%"
+                );
+            });
+        }
+    });
+}
+
+private function applyTagSearch(
+    $query,
+    array $tags
+): void
+{
+    foreach ($tags as $tag) {
+
+        $query->whereHas(
+            'tags',
+            fn ($q) => $q->where(
+                'name',
+                $tag
+            )
+        );
+    }
+}
+
+private function applyTagFilter(
+    $query,
+    ?string $tag
+): void
+{
+    if (!$tag) {
+        return;
+    }
+
+    $query->whereHas(
+        'tags',
+        fn ($q) => $q->where(
+            'name',
+            strtolower($tag)
+        )
+    );
+}
+
+private function applySorting(
+    $query,
+    string $sort
+): void
+{
+    match ($sort) {
+
+        'liked' =>
+            $query->orderBy(
+                'likes_count',
+                'desc'
+            ),
+
+        'relevant' =>
+            $query->orderByRaw(
+                '(likes_count * 2 + comments_count) DESC'
+            ),
+
+        default =>
+            $query->orderBy(
+                'created_at',
+                'desc'
+            ),
+    };
+}
     /**
      * =========================
      * CREATE POST
