@@ -190,9 +190,9 @@ Buscar posts, contenido o #tags...
                         cursor-pointer
                     "
                     >
-                    <option value="latest">Más recientes</option>
-                    <option value="liked">Más likeados</option>
-                    <option value="relevant">Más relevantes</option>
+                        <option value="latest">Más recientes</option>
+                        <option value="liked">Más likeados</option>
+                        <option value="relevant">Más relevantes</option>
                     </select>
 
                 </div>
