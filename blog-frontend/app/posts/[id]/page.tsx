@@ -160,7 +160,6 @@ export default function PostDetailPage() {
 
     }, [id]);
 
-    console.log(post);
     // =========================
     // DELETE POST
     // =========================

@@ -32,7 +32,6 @@ export default function UserProfilePage() {
                     await getUserProfile(
                         Number(id)
                     );
-                console.log(data);
                 setProfile(data);
 
             } catch (err) {
