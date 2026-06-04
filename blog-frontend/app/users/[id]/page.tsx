@@ -29,7 +29,7 @@ export default function UserProfilePage() {
 
     const { user } = useAuth();
 
-    
+
 
     const [loading, setLoading] =
         useState(true);
@@ -122,8 +122,8 @@ export default function UserProfilePage() {
             console.error(err);
         }
     };
-const isOwnProfile =
-    user?.id === profile?.user?.id;
+    const isOwnProfile =
+        user?.id === profile?.user?.id;
     if (loading) {
 
         return (
@@ -284,15 +284,15 @@ const isOwnProfile =
 
                     <div className="mt-5">
 
-                     {
-    !isOwnProfile && (
-        <div className="mt-5">
+                        {
+                            !isOwnProfile && (
+                                <div className="mt-5">
 
-            {isFollowing ? (
+                                    {isFollowing ? (
 
-                <button
-                    onClick={handleUnfollow}
-                    className="
+                                        <button
+                                            onClick={handleUnfollow}
+                                            className="
                         inline-flex
                         items-center
                         gap-2
@@ -304,16 +304,16 @@ const isOwnProfile =
                         hover:bg-red-500/20
                         transition
                     "
-                >
-                    <UserMinus size={18} />
-                    Dejar de seguir
-                </button>
+                                        >
+                                            <UserMinus size={18} />
+                                            Dejar de seguir
+                                        </button>
 
-            ) : (
+                                    ) : (
 
-                <button
-                    onClick={handleFollow}
-                    className="
+                                        <button
+                                            onClick={handleFollow}
+                                            className="
                         inline-flex
                         items-center
                         gap-2
@@ -325,16 +325,16 @@ const isOwnProfile =
                         hover:bg-green-500/20
                         transition
                     "
-                >
-                    <UserPlus size={18} />
-                    Seguir
-                </button>
+                                        >
+                                            <UserPlus size={18} />
+                                            Seguir
+                                        </button>
 
-            )}
+                                    )}
 
-        </div>
-    )
-}
+                                </div>
+                            )
+                        }
 
                     </div>
 
