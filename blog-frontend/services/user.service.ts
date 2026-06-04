@@ -44,3 +44,25 @@ export const updateUsername = async (
 
     return res.data;
 };
+
+export const followUser = async (
+    userId: number
+) => {
+
+    const res = await api.post(
+        `/users/${userId}/follow`
+    );
+
+    return res.data;
+};
+
+export const unfollowUser = async (
+    userId: number
+) => {
+
+    const res = await api.delete(
+        `/users/${userId}/follow`
+    );
+
+    return res.data;
+};

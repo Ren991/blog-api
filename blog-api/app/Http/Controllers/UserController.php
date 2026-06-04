@@ -10,43 +10,70 @@ use Illuminate\Support\Facades\Storage;
 class UserController extends Controller
 {
     public function profile($id)
-    {
-        $user = User::findOrFail($id);
+{
+    $user = User::findOrFail($id);
 
-        $posts = $user->posts()
-            ->with([
-                'user',
-                'tags',
-                'likes',
-                'comments.user'
-            ])
-            ->withCount([
-                'likes',
-                'comments'
-            ])
-            ->latest()
-            ->get();
+    $posts = $user->posts()
+        ->with([
+            'user',
+            'tags',
+            'likes',
+            'comments.user'
+        ])
+        ->withCount([
+            'likes',
+            'comments'
+        ])
+        ->latest()
+        ->get();
 
-        $likesReceived = $posts->sum('likes_count');
+    $likesReceived = $posts->sum('likes_count');
 
-        return response()->json([
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'avatar' => $user->avatar
-                    ? config('app.url') . '/storage/' . $user->avatar
-                    : null,
-            ],
+    $isFollowing = false;
 
-            'stats' => [
-                'posts' => $posts->count(),
-                'likes_received' => $likesReceived,
-            ],
+    if (auth()->check()) {
 
-            'posts' => PostResource::collection($posts),
-        ]);
+        $isFollowing = auth()
+            ->user()
+            ->following()
+            ->where(
+                'following_id',
+                $user->id
+            )
+            ->exists();
     }
+
+    return response()->json([
+        'user' => [
+            'id' => $user->id,
+
+            'name' => $user->name,
+
+            'email' => $user->email,
+
+            'avatar' => $user->avatar
+                ? config('app.url') . '/storage/' . $user->avatar
+                : null,
+
+            'followers_count' => $user
+                ->followers()
+                ->count(),
+
+            'following_count' => $user
+                ->following()
+                ->count(),
+
+            'is_following' => $isFollowing,
+        ],
+
+        'stats' => [
+            'posts' => $posts->count(),
+            'likes_received' => $likesReceived,
+        ],
+
+        'posts' => PostResource::collection($posts),
+    ]);
+}
 
     public function updateAvatar(Request $request)
     {
@@ -100,6 +127,37 @@ class UserController extends Controller
         return response()->json([
             'message' => 'Nombre actualizado correctamente',
             'user' => $user,
+        ]);
+    }
+
+    public function follow(User $user)
+{
+    if (auth()->id() === $user->id) {
+
+        return response()->json([
+            'message' => 'No puedes seguirte a ti mismo'
+        ], 422);
+    }
+
+    auth()->user()
+        ->following()
+        ->syncWithoutDetaching([
+            $user->id
+        ]);
+
+    return response()->json([
+        'message' => 'Usuario seguido'
+    ]);
+}
+
+    public function unfollow(User $user)
+    {
+        auth()->user()
+            ->following()
+            ->detach($user->id);
+
+        return response()->json([
+            'message' => 'Usuario dejado de seguir'
         ]);
     }
 }

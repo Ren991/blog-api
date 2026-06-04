@@ -16,6 +16,16 @@ class UserResource extends JsonResource
             'avatar' => $this->avatar
             ? config('app.url') . '/storage/' . $this->avatar
             : null,
+            'name_changed_at' => $this->name_changed_at,
+
+            'followers_count' => $this->followers()->count(),
+            'following_count' => $this->following()->count(),
+
+            'is_following' => auth()->check()
+                ? auth()->user()->following()
+                    ->where('following_id', $this->id)
+                    ->exists()
+                : false,
         ];
     }
 }

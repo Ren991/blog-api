@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import { useAuth } from "@/app/context/AuthContext";
 import { useParams } from "next/navigation";
 
 import Link from "next/link";
@@ -12,15 +12,38 @@ import { getUserProfile } from "@/services/user.service";
 
 import PostCard from "@/components/posts/PostCard";
 
+import {
+    followUser,
+    unfollowUser,
+} from "@/services/user.service";
+
+import {
+    Users,
+    UserPlus,
+    UserMinus,
+} from "lucide-react";
+
 export default function UserProfilePage() {
 
     const { id } = useParams();
+
+    const { user } = useAuth();
+
+    
 
     const [loading, setLoading] =
         useState(true);
 
     const [profile, setProfile] =
         useState<any>(null);
+
+    const [isFollowing, setIsFollowing] =
+        useState(false);
+
+    const [followersCount, setFollowersCount] =
+        useState(0);
+
+
 
     useEffect(() => {
 
@@ -32,7 +55,16 @@ export default function UserProfilePage() {
                     await getUserProfile(
                         Number(id)
                     );
+                console.log(data)
                 setProfile(data);
+
+                setIsFollowing(
+                    data.user.is_following
+                );
+
+                setFollowersCount(
+                    data.user.followers_count
+                );
 
             } catch (err) {
 
@@ -48,6 +80,50 @@ export default function UserProfilePage() {
 
     }, [id]);
 
+    const handleFollow = async () => {
+
+        try {
+
+            await followUser(
+                Number(id)
+            );
+
+            setIsFollowing(true);
+
+            setFollowersCount(
+                prev => prev + 1
+            );
+
+        } catch (err) {
+
+            console.error(err);
+        }
+    };
+
+    const handleUnfollow = async () => {
+
+        try {
+
+            await unfollowUser(
+                Number(id)
+            );
+
+            setIsFollowing(false);
+
+            setFollowersCount(
+                prev => Math.max(
+                    0,
+                    prev - 1
+                )
+            );
+
+        } catch (err) {
+
+            console.error(err);
+        }
+    };
+const isOwnProfile =
+    user?.id === profile?.user?.id;
     if (loading) {
 
         return (
@@ -159,15 +235,16 @@ export default function UserProfilePage() {
 
                 <div
                     className="
-                        flex gap-8 mt-6
-                    "
+        flex
+        gap-10
+        mt-6
+        flex-wrap
+    "
                 >
 
                     <div>
                         <p className="text-2xl font-bold">
-                            {
-                                profile.stats.posts
-                            }
+                            {profile.stats.posts}
                         </p>
 
                         <p className="text-zinc-400">
@@ -177,14 +254,88 @@ export default function UserProfilePage() {
 
                     <div>
                         <p className="text-2xl font-bold">
-                            {
-                                profile.stats.likes_received
-                            }
+                            {profile.stats.likes_received}
                         </p>
 
                         <p className="text-zinc-400">
                             Likes
                         </p>
+                    </div>
+
+                    <div>
+                        <p className="text-2xl font-bold">
+                            {followersCount}
+                        </p>
+
+                        <p className="text-zinc-400">
+                            Seguidores
+                        </p>
+                    </div>
+
+                    <div>
+                        <p className="text-2xl font-bold">
+                            {profile.user.following_count}
+                        </p>
+
+                        <p className="text-zinc-400">
+                            Siguiendo
+                        </p>
+                    </div>
+
+                    <div className="mt-5">
+
+                     {
+    !isOwnProfile && (
+        <div className="mt-5">
+
+            {isFollowing ? (
+
+                <button
+                    onClick={handleUnfollow}
+                    className="
+                        inline-flex
+                        items-center
+                        gap-2
+                        rounded-xl
+                        bg-red-500/10
+                        text-red-400
+                        px-5
+                        py-3
+                        hover:bg-red-500/20
+                        transition
+                    "
+                >
+                    <UserMinus size={18} />
+                    Dejar de seguir
+                </button>
+
+            ) : (
+
+                <button
+                    onClick={handleFollow}
+                    className="
+                        inline-flex
+                        items-center
+                        gap-2
+                        rounded-xl
+                        bg-green-500/10
+                        text-green-400
+                        px-5
+                        py-3
+                        hover:bg-green-500/20
+                        transition
+                    "
+                >
+                    <UserPlus size={18} />
+                    Seguir
+                </button>
+
+            )}
+
+        </div>
+    )
+}
+
                     </div>
 
                 </div>

@@ -37,6 +37,16 @@ Route::middleware('auth:sanctum')->group(function () {
         [UserController::class, 'updateAvatar']
     );
 
+    Route::post(
+        '/users/{user}/follow',
+        [UserController::class, 'follow']
+    );
+
+    Route::delete(
+        '/users/{user}/follow',
+        [UserController::class, 'unfollow']
+    );
+
     Route::put('/user/name', [UserController::class, 'updateName']);
     // Posts
     Route::apiResource('posts', PostController::class);
