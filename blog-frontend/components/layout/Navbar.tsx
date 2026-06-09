@@ -6,7 +6,7 @@ import { LogOut, User } from "lucide-react";
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
-
+  console.log(user)
 
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/60 backdrop-blur-xl">
